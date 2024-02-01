@@ -1,4 +1,4 @@
-﻿namespace DjK.BackupTool.ViewModel.Messenger.Abstractions;
+﻿namespace DjX.Mvvm.Messenger.Abstractions;
 
 public interface IMessagingService
 {

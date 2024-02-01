@@ -1,5 +1,5 @@
-﻿using DjK.BackupTool.ViewModel.Messenger.Abstractions;
-using DjK.BackupTool.ViewModel.Platforms;
+﻿using DjX.Mvvm.Messenger.Abstractions;
+using DjX.Mvvm.Platforms;
 using System.Collections.Concurrent;
 
 namespace DjK.BackupTool.ViewModel.Messenger;
@@ -32,6 +32,7 @@ public class MessagingService : IMessagingService
         }
         catch (Exception ex)
         {
+            // TODO: add logging
             throw;
         }
     }

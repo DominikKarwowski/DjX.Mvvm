@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
-namespace DjK.BackupTool.ViewModel.ViewModels;
+namespace DjX.Mvvm.ViewModels;
 
 public abstract class ViewModelBase : INotifyPropertyChanged
 {

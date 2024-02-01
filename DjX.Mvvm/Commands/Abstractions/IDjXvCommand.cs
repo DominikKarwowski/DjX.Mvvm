@@ -1,4 +1,4 @@
-﻿namespace DjK.BackupTool.ViewModel.Commands.Abstractions;
+﻿namespace DjX.Mvvm.Commands.Abstractions;
 
 public interface IDjXvCommand : IDjXvBaseCommand
 {

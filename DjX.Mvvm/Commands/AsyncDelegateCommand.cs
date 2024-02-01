@@ -1,6 +1,6 @@
-﻿using DjK.BackupTool.ViewModel.Commands.Abstractions;
+﻿using DjX.Mvvm.Commands.Abstractions;
 
-namespace DjK.BackupTool.ViewModel.Commands;
+namespace DjX.Mvvm.Commands;
 
 
 //https://learn.microsoft.com/en-us/archive/msdn-magazine/2014/april/async-programming-patterns-for-asynchronous-mvvm-applications-commands

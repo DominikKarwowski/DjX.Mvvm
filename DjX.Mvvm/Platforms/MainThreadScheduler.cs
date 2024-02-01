@@ -2,7 +2,7 @@
 using Microsoft.UI.Dispatching;
 #endif
 
-namespace DjK.BackupTool.ViewModel.Platforms;
+namespace DjX.Mvvm.Platforms;
 
 public class MainThreadScheduler
 {

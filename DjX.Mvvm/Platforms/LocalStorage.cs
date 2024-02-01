@@ -1,4 +1,4 @@
-﻿namespace DjK.BackupTool.ViewModel.Platforms;
+﻿namespace DjX.Mvvm.Platforms;
 public static class LocalStorage
 {
     public static string Path =>

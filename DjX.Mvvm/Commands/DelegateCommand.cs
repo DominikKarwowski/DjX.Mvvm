@@ -1,6 +1,6 @@
-﻿using DjK.BackupTool.ViewModel.Commands.Abstractions;
+﻿using DjX.Mvvm.Commands.Abstractions;
 
-namespace DjK.BackupTool.ViewModel.Commands;
+namespace DjX.Mvvm.Commands;
 
 
 public class DelegateCommand<T> : IDjXvCommand<T>
