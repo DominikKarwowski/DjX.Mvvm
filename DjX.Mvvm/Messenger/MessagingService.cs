@@ -2,7 +2,7 @@
 using DjX.Mvvm.Platforms;
 using System.Collections.Concurrent;
 
-namespace DjK.BackupTool.ViewModel.Messenger;
+namespace DjX.Mvvm.Messenger;
 
 public class MessagingService : IMessagingService
 {

@@ -1,5 +1,5 @@
-﻿using DjK.BackupTool.ViewModel.Messenger;
-using DjK.BackupTool.ViewModel.Platforms;
+﻿using DjX.Mvvm.Messenger;
+using DjX.Mvvm.Platforms;
 
 namespace BackupTool.ViewModel.Tests.Messenger;
 
