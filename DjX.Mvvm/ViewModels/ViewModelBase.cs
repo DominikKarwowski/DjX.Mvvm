@@ -20,17 +20,17 @@ public abstract class ViewModelBase : INotifyPropertyChanged
 
     private void DisposeAsyncCommands()
     {
-        var disposableCommands = GetType().GetProperties()
+        var commands = GetType().GetProperties()
             .Where(p =>
                 p.PropertyType == typeof(IDjXAsyncCommand)
                 || p.PropertyType.IsGenericType && p.PropertyType.GetGenericTypeDefinition() == typeof(IDjXAsyncCommand<>))
             .Select(p => p.GetValue(this));
 
-        foreach (var disposableCommand in disposableCommands)
+        foreach (var command in commands)
         {
-            if (disposableCommand is IDisposable cmd)
+            if (command is IDisposable disposableCommand)
             {
-                cmd.Dispose();
+                disposableCommand.Dispose();
             }
         }
     }
