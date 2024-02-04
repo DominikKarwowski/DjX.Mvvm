@@ -1,11 +1,11 @@
 ﻿namespace DjX.Mvvm.Commands.Abstractions;
 
-public interface IDjXvAsyncCommand : IDjXvBaseCommand
+public interface IDjXAsyncCommand : IDjXBaseCommand
 {
     Task ExecuteAsync();
 }
 
-public interface IDjXvAsyncCommand<T> : IDjXvBaseCommand
+public interface IDjXAsyncCommand<T> : IDjXBaseCommand
 {
     Task ExecuteAsync(T? parameter);
 }

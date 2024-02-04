@@ -1,11 +1,11 @@
 ﻿namespace DjX.Mvvm.Commands.Abstractions;
 
-public interface IDjXvCommand : IDjXvBaseCommand
+public interface IDjXCommand : IDjXBaseCommand
 {
     void Execute();
 }
 
-public interface IDjXvCommand<T> : IDjXvBaseCommand
+public interface IDjXCommand<T> : IDjXBaseCommand
 {
     void Execute(T parameter);
 }

@@ -2,7 +2,7 @@
 
 namespace DjX.Mvvm.Commands.Abstractions;
 
-public interface IDjXvBaseCommand : ICommand
+public interface IDjXBaseCommand : ICommand
 {
     void RaiseCanExecuteChanged();
 }
