@@ -6,14 +6,14 @@ namespace DjX.Mvvm.Commands;
 //https://learn.microsoft.com/en-us/archive/msdn-magazine/2014/april/async-programming-patterns-for-asynchronous-mvvm-applications-commands
 //https://johnthiriet.com/mvvm-going-async-with-async-command/
 
-public class AsyncDelegateCommand<T> : IDjXvAsyncCommand<T>, IDisposable
+public class DjXAsyncDelegateCommand<T> : IDjXAsyncCommand<T>, IDisposable
 {
     private readonly Func<T?, Task> _execute;
     private readonly Func<T?, bool>? _canExecute;
     private readonly SemaphoreSlim _semaphore = new(1, 1);
     private bool disposedValue;
 
-    public AsyncDelegateCommand(Func<T?, Task> execute, Func<T?, bool>? canExecute = null)
+    public DjXAsyncDelegateCommand(Func<T?, Task> execute, Func<T?, bool>? canExecute = null)
     {
         ArgumentNullException.ThrowIfNull(execute);
         _execute = execute;
@@ -60,14 +60,14 @@ public class AsyncDelegateCommand<T> : IDjXvAsyncCommand<T>, IDisposable
     }
 }
 
-public class AsyncDelegateCommand : IDjXvAsyncCommand, IDisposable
+public class DjXAsyncDelegateCommand : IDjXAsyncCommand, IDisposable
 {
     private readonly Func<object?, Task> _execute;
     private readonly Func<object?, bool>? _canExecute;
     private readonly SemaphoreSlim _semaphore = new(1, 1);
     private bool disposedValue;
 
-    public AsyncDelegateCommand(Func<Task> execute, Func<bool>? canExecute = null)
+    public DjXAsyncDelegateCommand(Func<Task> execute, Func<bool>? canExecute = null)
     {
         ArgumentNullException.ThrowIfNull(execute);
         _execute = new Func<object?, Task>(param => execute());
@@ -76,7 +76,7 @@ public class AsyncDelegateCommand : IDjXvAsyncCommand, IDisposable
             : new Func<object?, bool>(param => canExecute());
     }
 
-    public AsyncDelegateCommand(Func<object?, Task> execute, Func<object?, bool>? canExecute = null)
+    public DjXAsyncDelegateCommand(Func<object?, Task> execute, Func<object?, bool>? canExecute = null)
     {
         ArgumentNullException.ThrowIfNull(execute);
         _execute = execute;

@@ -13,8 +13,8 @@ public class DelegateCommandTests
 
         Assert.Multiple(() =>
         {
-            Assert.Throws<ArgumentNullException>(() => new DelegateCommand(action!));
-            Assert.Throws<ArgumentNullException>(() => new DelegateCommand(actionWithParam!));
+            Assert.Throws<ArgumentNullException>(() => new DjXDelegateCommand(action!));
+            Assert.Throws<ArgumentNullException>(() => new DjXDelegateCommand(actionWithParam!));
         });
     }
 
@@ -23,7 +23,7 @@ public class DelegateCommandTests
     {
         var canExecuteChangedRaised = false;
 
-        var sut = new DelegateCommand(() => { });
+        var sut = new DjXDelegateCommand(() => { });
 
         sut.CanExecuteChanged += (s, e) => canExecuteChangedRaised = true;
 
@@ -35,7 +35,7 @@ public class DelegateCommandTests
     [Test]
     public void CanExecute_returns_true_if_canExecute_function_is_not_specified_in_DelegateCommand()
     {
-        var sut = new DelegateCommand(() => { });
+        var sut = new DjXDelegateCommand(() => { });
 
         var result = sut.CanExecute(null);
 
@@ -47,7 +47,7 @@ public class DelegateCommandTests
     {
         var canExecuteWasInvoked = false;
 
-        var sut = new DelegateCommand(
+        var sut = new DjXDelegateCommand(
             () => { },
             () =>
             {
@@ -65,7 +65,7 @@ public class DelegateCommandTests
     {
         var executeWasInvoked = false;
 
-        var sut = new DelegateCommand(() => executeWasInvoked = true);
+        var sut = new DjXDelegateCommand(() => executeWasInvoked = true);
 
         sut.Execute();
 
@@ -81,7 +81,7 @@ public class DelegateCommandOfTTests
     {
         Action<string?>? actionWithParam = null;
 
-        Assert.Throws<ArgumentNullException>(() => new DelegateCommand<string>(actionWithParam!));
+        Assert.Throws<ArgumentNullException>(() => new DjXDelegateCommand<string>(actionWithParam!));
     }
 
     [Test]
@@ -89,7 +89,7 @@ public class DelegateCommandOfTTests
     {
         var canExecuteChangedRaised = false;
 
-        var sut = new DelegateCommand<string>(s => { });
+        var sut = new DjXDelegateCommand<string>(s => { });
 
         sut.CanExecuteChanged += (s, e) => canExecuteChangedRaised = true;
 
@@ -101,7 +101,7 @@ public class DelegateCommandOfTTests
     [Test]
     public void CanExecute_returns_true_if_canExecute_function_is_not_specified_in_DelegateCommand()
     {
-        var sut = new DelegateCommand<string>(s => { });
+        var sut = new DjXDelegateCommand<string>(s => { });
 
         var result = sut.CanExecute("");
 
@@ -113,7 +113,7 @@ public class DelegateCommandOfTTests
     {
         var canExecuteWasInvoked = false;
 
-        var sut = new DelegateCommand<string>(
+        var sut = new DjXDelegateCommand<string>(
             s => { },
             s =>
             {
@@ -131,7 +131,7 @@ public class DelegateCommandOfTTests
     {
         var executeWasInvoked = false;
 
-        var sut = new DelegateCommand<string>(s => executeWasInvoked = true);
+        var sut = new DjXDelegateCommand<string>(s => executeWasInvoked = true);
 
         sut.Execute("");
 

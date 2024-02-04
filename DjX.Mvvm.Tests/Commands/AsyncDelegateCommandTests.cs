@@ -14,8 +14,8 @@ public class AsyncDelegateCommandTests
 
         Assert.Multiple(() =>
         {
-            Assert.Throws<ArgumentNullException>(() => new AsyncDelegateCommand(asyncAction!));
-            Assert.Throws<ArgumentNullException>(() => new AsyncDelegateCommand(asyncActionWithParam!));
+            Assert.Throws<ArgumentNullException>(() => new DjXAsyncDelegateCommand(asyncAction!));
+            Assert.Throws<ArgumentNullException>(() => new DjXAsyncDelegateCommand(asyncActionWithParam!));
         });
     }
 
@@ -24,7 +24,7 @@ public class AsyncDelegateCommandTests
     {
         var canExecuteChangedRaised = false;
 
-        var sut = new AsyncDelegateCommand(() => Task.CompletedTask);
+        var sut = new DjXAsyncDelegateCommand(() => Task.CompletedTask);
 
         sut.CanExecuteChanged += (s, e) => canExecuteChangedRaised = true;
 
@@ -36,7 +36,7 @@ public class AsyncDelegateCommandTests
     [Test]
     public void CanExecute_returns_true_if_canExecute_function_is_not_specified_in_DelegateCommand()
     {
-        var sut = new AsyncDelegateCommand(() => Task.CompletedTask);
+        var sut = new DjXAsyncDelegateCommand(() => Task.CompletedTask);
 
         var result = sut.CanExecute(null);
 
@@ -48,7 +48,7 @@ public class AsyncDelegateCommandTests
     {
         var canExecuteWasInvoked = false;
 
-        var sut = new AsyncDelegateCommand(
+        var sut = new DjXAsyncDelegateCommand(
             () => Task.CompletedTask,
             () =>
             {
@@ -66,7 +66,7 @@ public class AsyncDelegateCommandTests
     {
         var executeWasInvoked = false;
 
-        var sut = new AsyncDelegateCommand(() =>
+        var sut = new DjXAsyncDelegateCommand(() =>
         {
             executeWasInvoked = true;
             return Task.CompletedTask;
@@ -80,7 +80,7 @@ public class AsyncDelegateCommandTests
     [Test]
     public async Task ExecuteAsync_executes_only_one_action_delegate_at_a_time()
     {
-        var sut = new AsyncDelegateCommand(() => Task.Delay(25));
+        var sut = new DjXAsyncDelegateCommand(() => Task.Delay(25));
 
         var sw = new Stopwatch();
 
@@ -109,8 +109,8 @@ public class AsyncDelegateCommandOfTTests
 
         Assert.Multiple(() =>
         {
-            Assert.Throws<ArgumentNullException>(() => new AsyncDelegateCommand<string>(asyncAction!));
-            Assert.Throws<ArgumentNullException>(() => new AsyncDelegateCommand<string>(asyncActionWithParam!));
+            Assert.Throws<ArgumentNullException>(() => new DjXAsyncDelegateCommand<string>(asyncAction!));
+            Assert.Throws<ArgumentNullException>(() => new DjXAsyncDelegateCommand<string>(asyncActionWithParam!));
         });
     }
 
@@ -119,7 +119,7 @@ public class AsyncDelegateCommandOfTTests
     {
         var canExecuteChangedRaised = false;
 
-        var sut = new AsyncDelegateCommand<string>(s => Task.CompletedTask);
+        var sut = new DjXAsyncDelegateCommand<string>(s => Task.CompletedTask);
 
         sut.CanExecuteChanged += (s, e) => canExecuteChangedRaised = true;
 
@@ -131,7 +131,7 @@ public class AsyncDelegateCommandOfTTests
     [Test]
     public void CanExecute_returns_true_if_canExecute_function_is_not_specified_in_DelegateCommand()
     {
-        var sut = new AsyncDelegateCommand<string>(s => Task.CompletedTask);
+        var sut = new DjXAsyncDelegateCommand<string>(s => Task.CompletedTask);
 
         var result = sut.CanExecute(null);
 
@@ -143,7 +143,7 @@ public class AsyncDelegateCommandOfTTests
     {
         var canExecuteWasInvoked = false;
 
-        var sut = new AsyncDelegateCommand<string>(
+        var sut = new DjXAsyncDelegateCommand<string>(
             s => Task.CompletedTask,
             s =>
             {
@@ -161,7 +161,7 @@ public class AsyncDelegateCommandOfTTests
     {
         var executeWasInvoked = false;
 
-        var sut = new AsyncDelegateCommand<string>(s =>
+        var sut = new DjXAsyncDelegateCommand<string>(s =>
         {
             executeWasInvoked = true;
             return Task.CompletedTask;
@@ -175,7 +175,7 @@ public class AsyncDelegateCommandOfTTests
     [Test]
     public async Task ExecuteAsync_executes_only_one_action_delegate_at_a_time()
     {
-        var sut = new AsyncDelegateCommand<string>(s => Task.Delay(25));
+        var sut = new DjXAsyncDelegateCommand<string>(s => Task.Delay(25));
 
         var sw = new Stopwatch();
 
