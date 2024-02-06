@@ -8,7 +8,7 @@ namespace DjX.Mvvm.Views;
 public abstract class DjXActivityBase<T> : Activity
     where T : ViewModelBase
 {
-    public T ViewModel { get; set; }
+    public T ViewModel { get; private set; }
 
     protected override void OnCreate(Bundle? savedInstanceState)
     {
