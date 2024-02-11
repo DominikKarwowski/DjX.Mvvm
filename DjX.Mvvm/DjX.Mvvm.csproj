@@ -24,6 +24,5 @@
 
 	<ItemGroup>
 	  <Folder Include="Navigation\" />
-	  <Folder Include="DataBinding\" />
 	</ItemGroup>
 </Project>
