@@ -93,4 +93,5 @@ public sealed class AndroidEventBindingSet : BindingSet<View>
             disposedValue = true;
         }
     }
-}#endif
+}
+#endif
