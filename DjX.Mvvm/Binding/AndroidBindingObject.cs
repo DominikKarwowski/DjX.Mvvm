@@ -1,10 +1,7 @@
 ﻿#if ANDROID21_0_OR_GREATER
-using Android.Text;
 using Android.Views;
-using DjX.Mvvm.Binding.Abstractions;
 using DjX.Mvvm.Commands.Abstractions;
 using DjX.Mvvm.ViewModels;
-using System.ComponentModel;
 using System.Reflection;
 
 namespace DjX.Mvvm.Binding;
