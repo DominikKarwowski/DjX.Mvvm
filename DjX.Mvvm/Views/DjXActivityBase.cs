@@ -1,5 +1,6 @@
 ﻿#if ANDROID21_0_OR_GREATER
 using Android.Content;
+using Android.Runtime;
 using Android.Util;
 using Android.Views;
 using DjX.Mvvm.Binding;
@@ -12,19 +13,11 @@ public abstract class DjXActivityBase<T> : Activity
     where T : ViewModelBase
 {
     private readonly AndroidBindingObject bindingObject = new();
-    public T ViewModel { get; private set; }
 
-    public DjXActivityBase()
-    {
-        if (Application is DjXApplication djXApplication)
-        {
-            ViewModel = djXApplication.CreateViewModel<T>();
-        }
-        else
-        {
-            throw new InvalidOperationException("Application must be of type DjXApplication");
-        }
-    }
+#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
+    // ViewModel is set in OnCreate
+    public T ViewModel { get; private set; }
+#pragma warning restore CS8618
 
     public override View? OnCreateView(View? parent, string name, Context context, IAttributeSet attrs)
     {
@@ -52,6 +45,15 @@ public abstract class DjXActivityBase<T> : Activity
 
     protected override void OnCreate(Bundle? savedInstanceState)
     {
+        if (Application is DjXApplication djXApplication)
+        {
+            ViewModel = djXApplication.CreateViewModel<T>();
+        }
+        else
+        {
+            throw new InvalidOperationException("Application must be of type DjXApplication");
+        }
+
         base.OnCreate(savedInstanceState);
     }
 

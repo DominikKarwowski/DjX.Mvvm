@@ -10,8 +10,6 @@ public abstract class BindingSet<TTargetType> : IDisposable
     protected readonly TTargetType TargetObject;
     protected readonly string TargetMemberName;
 
-    private bool disposedValue;
-
     public BindingSet(INotifyPropertyChanged sourceObject, string sourceMemberName, TTargetType targetObject, string targetMemberName)
     {
         SourceObject = sourceObject;

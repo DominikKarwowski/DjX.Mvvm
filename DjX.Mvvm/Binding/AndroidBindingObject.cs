@@ -46,7 +46,7 @@ public sealed class AndroidBindingObject : IDisposable
 
     private void RegisterEventBindingSet(ViewModelBase sourceObject, View targetObject, ParsedBinding parsedBinding, PropertyInfo? sourceProperty)
     {
-        if (sourceProperty?.PropertyType.GetInterface(nameof(IDjXCommand)) is not null)
+        if (sourceProperty is not null)
         {
             var eventBinding = new AndroidEventBindingSet(sourceObject, parsedBinding.SourceMemberName, targetObject, parsedBinding.TargetMemberName);
             EventBindings.Add(eventBinding);
