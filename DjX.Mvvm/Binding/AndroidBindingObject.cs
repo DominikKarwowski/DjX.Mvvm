@@ -23,7 +23,7 @@ public sealed class AndroidBindingObject : IDisposable
         EventBindings.ForEach(eb => eb.Dispose());
     }
 
-    private void RegisterBindingSet(ViewModelBase sourceObject, View targetObject, string bindingDeclaration,
+    private static void RegisterBindingSet(ViewModelBase sourceObject, View targetObject, string bindingDeclaration,
         Action<ViewModelBase, View, ParsedBinding, PropertyInfo?> registerBindingSet)
     {
         var parsedBinding = ParseBindingDeclaration(bindingDeclaration);
