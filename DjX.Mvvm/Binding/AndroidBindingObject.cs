@@ -2,6 +2,7 @@
 using Android.Text;
 using Android.Views;
 using DjX.Mvvm.Binding.Abstractions;
+using DjX.Mvvm.Commands.Abstractions;
 using System.ComponentModel;
 
 namespace DjX.Mvvm.Binding;
@@ -16,7 +17,6 @@ public sealed class AndroidBindingObject : IDisposable
         EventBindings.ForEach(eb => eb.Dispose());
     }
 }
-
 
 public sealed class AndroidPropertyBindingSet : BindingSet<View>
 {
@@ -80,6 +80,18 @@ public sealed class AndroidEventBindingSet : BindingSet<View>
     public AndroidEventBindingSet(INotifyPropertyChanged sourceObject, string sourceMemberName, View targetObject, string targetMemberName)
         : base(sourceObject, sourceMemberName, targetObject, targetMemberName)
     {
+        TargetObject.GetType().GetEvent(TargetMemberName)?.AddEventHandler(TargetObject, OnTargetEventRaisedDelegate);
+    }
+
+    public EventHandler? OnTargetEventRaisedDelegate => OnTargetEventRaised;
+
+    private void OnTargetEventRaised(object? sender, EventArgs e)
+    {
+        var command = SourceObject.GetType().GetProperty(SourceMemberName)?.GetValue(SourceObject) as IDjXCommand;
+        if (command is not null && command.CanExecute(null))
+        {
+            command.Execute();
+        }
     }
 
     protected override void Dispose(bool disposing)
@@ -88,10 +100,10 @@ public sealed class AndroidEventBindingSet : BindingSet<View>
         {
             if (disposing)
             {
+                TargetObject.GetType().GetEvent(TargetMemberName)?.RemoveEventHandler(TargetObject, OnTargetEventRaisedDelegate);
             }
             disposedValue = true;
         }
     }
 }
-
 #endif
