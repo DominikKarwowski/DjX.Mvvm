@@ -2,6 +2,7 @@
 using Android.Text;
 using Android.Views;
 using DjX.Mvvm.Binding.Abstractions;
+using DjX.Mvvm.Commands.Abstractions;
 using System.ComponentModel;
 
 namespace DjX.Mvvm.Binding;
