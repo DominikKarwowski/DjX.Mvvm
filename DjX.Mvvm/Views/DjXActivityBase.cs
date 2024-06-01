@@ -51,7 +51,7 @@ public abstract class DjXActivityBase<T> : Activity
         }
         else
         {
-            throw new InvalidOperationException("Application must be of type DjXApplication");
+            throw new InvalidOperationException($"Application must be of type {nameof(DjXApplication)}");
         }
 
         base.OnCreate(savedInstanceState);
@@ -64,15 +64,13 @@ public abstract class DjXActivityBase<T> : Activity
         base.OnDestroy();
     }
 
-    private View? CreateView(View? parent, string name, Context context, IAttributeSet attrs)
-    {
-        return name switch
+    private View? CreateView(View? parent, string name, Context context, IAttributeSet attrs) =>
+        name switch
         {
             "EditText" => new EditText(context, attrs),
             "TextView" => new TextView(context, attrs),
             "Button" => new Button(context, attrs),
             _ => base.OnCreateView(parent, name, context, attrs),
         };
-    }
 }
 #endif
