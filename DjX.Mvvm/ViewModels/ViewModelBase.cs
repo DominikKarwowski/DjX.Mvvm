@@ -8,7 +8,7 @@ public abstract class ViewModelBase : INotifyPropertyChanged
 {
     public event PropertyChangedEventHandler? PropertyChanged;
 
-    protected virtual void RaisePropertyChanged([CallerMemberName] string? propertyName = null)
+    protected void RaisePropertyChanged([CallerMemberName] string? propertyName = null)
     {
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }
@@ -33,5 +33,13 @@ public abstract class ViewModelBase : INotifyPropertyChanged
                 disposableCommand.Dispose();
             }
         }
+    }
+
+
+    public event Action<Type>? NavigationRequested;
+
+    protected void NavigateTo<TViewModel>() where TViewModel : ViewModelBase
+    {
+        NavigationRequested?.Invoke(typeof(TViewModel));
     }
 }

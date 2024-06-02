@@ -6,6 +6,8 @@ using Android.Views;
 using DjX.Mvvm.Binding;
 using DjX.Mvvm.Platforms.Android;
 using DjX.Mvvm.ViewModels;
+using DjX.Mvvm.ViewModels.Attributes;
+using System.Reflection;
 
 namespace DjX.Mvvm.Views;
 
@@ -48,6 +50,7 @@ public abstract class DjXActivityBase<T> : Activity
         if (Application is DjXApplication djXApplication)
         {
             ViewModel = djXApplication.CreateViewModel<T>();
+            ViewModel.NavigationRequested += NavigateTo;
         }
         else
         {
@@ -59,6 +62,7 @@ public abstract class DjXActivityBase<T> : Activity
 
     protected override void OnDestroy()
     {
+        ViewModel.NavigationRequested -= NavigateTo;
         ViewModel.OnViewModelDestroy();
         bindingObject.Dispose();
         base.OnDestroy();
@@ -72,5 +76,22 @@ public abstract class DjXActivityBase<T> : Activity
             "Button" => new Button(context, attrs),
             _ => base.OnCreateView(parent, name, context, attrs),
         };
+
+    private void NavigateTo(Type vmType)
+    {
+        var ass = AppDomain.CurrentDomain.GetAssemblies();
+        var assembly = ass.Where(a => a.FullName?.StartsWith("PhotoSessionAssistant.Droid") ?? false).FirstOrDefault();
+        var linkedViewAttr = vmType.GetCustomAttribute<LinkedViewAttribute>();
+        var viewName = linkedViewAttr?.ViewName;
+        if (viewName is not null)
+        {
+            Type? viewType = assembly?.GetType(viewName);
+            if (viewType is not null)
+            {
+                var intent = new Intent(this, viewType);
+                StartActivity(intent);
+            }
+        }
+    }
 }
 #endif
