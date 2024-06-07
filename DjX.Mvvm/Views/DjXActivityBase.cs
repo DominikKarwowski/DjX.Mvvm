@@ -84,12 +84,23 @@ public abstract class DjXActivityBase<T> : Activity
 
     private void NavigateTo(Type viewModelType)
     {
+        Type? viewType = GetViewForViewModel(viewModelType);
+
+        if (viewType is not null)
+        {
+            var intent = new Intent(this, viewType);
+            StartActivity(intent);
+        }
+    }
+
+    private Type? GetViewForViewModel(Type viewModelType)
+    {
         var linkedViewAttr = viewModelType.GetCustomAttribute<LinkedViewAttribute>();
 
         if (string.IsNullOrWhiteSpace(navigationService?.ViewsNamespace)
             || string.IsNullOrWhiteSpace(linkedViewAttr?.ViewName))
         {
-            return;
+            return default;
         }
 
         var viewName = string.Join(".",
@@ -98,12 +109,7 @@ public abstract class DjXActivityBase<T> : Activity
 
         var assembly = navigationService.AndroidExecutingAssembly ?? TryResolveExecutingAssembly();
 
-        Type? viewType = assembly?.GetType(viewName);
-        if (viewType is not null)
-        {
-            var intent = new Intent(this, viewType);
-            StartActivity(intent);
-        }
+        return assembly?.GetType(viewName);
     }
 
     private Assembly? TryResolveExecutingAssembly()
