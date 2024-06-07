@@ -1,10 +1,11 @@
 ﻿using DjX.Mvvm.Commands.Abstractions;
+using DjX.Mvvm.Navigation.Abstractions;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
 namespace DjX.Mvvm.ViewModels;
 
-public abstract class ViewModelBase : INotifyPropertyChanged
+public abstract class ViewModelBase : INotifyPropertyChanged, INavigable
 {
     public event PropertyChangedEventHandler? PropertyChanged;
 
@@ -34,7 +35,6 @@ public abstract class ViewModelBase : INotifyPropertyChanged
             }
         }
     }
-
 
     public event Action<Type>? NavigationRequested;
 
