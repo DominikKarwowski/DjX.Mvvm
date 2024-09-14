@@ -1,18 +1,21 @@
 ﻿#if ANDROID21_0_OR_GREATER
 using Android.Content;
-using Android.Runtime;
 using Android.Util;
 using Android.Views;
+using AndroidX.AppCompat.App;
+using AndroidX.AppCompat.Widget;
 using DjX.Mvvm.Binding;
 using DjX.Mvvm.Navigation;
 using DjX.Mvvm.Platforms.Android;
 using DjX.Mvvm.ViewModels;
 using DjX.Mvvm.ViewModels.Attributes;
+using Google.Android.Material.FloatingActionButton;
+using Google.Android.Material.TextView;
 using System.Reflection;
 
 namespace DjX.Mvvm.Views;
 
-public abstract class DjXActivityBase<T> : Activity
+public abstract class DjXActivityBase<T> : AppCompatActivity
     where T : ViewModelBase
 {
     private AndroidNavigationService? navigationService;
@@ -30,7 +33,7 @@ public abstract class DjXActivityBase<T> : Activity
         var propertyBindingToParse = attrs.GetAttributeValue(namespaceUri, "bind_property");
         var eventBindingToParse = attrs.GetAttributeValue(namespaceUri, "bind_event");
 
-        View? view = CreateView(parent, name, context, attrs);
+        View? view = this.CreateView(parent, name, context, attrs);
 
         if (view is not null)
         {
@@ -79,6 +82,10 @@ public abstract class DjXActivityBase<T> : Activity
             "EditText" => new EditText(context, attrs),
             "TextView" => new TextView(context, attrs),
             "Button" => new Button(context, attrs),
+            "com.google.android.material.textview.MaterialTextView" => new MaterialTextView(context, attrs),
+            "androidx.appcompat.widget.AppCompatEditText" => new AppCompatEditText(context, attrs),
+            "androidx.appcompat.widget.AppCompatButton" => new AppCompatButton(context, attrs),
+            "com.google.android.material.floatingactionbutton.FloatingActionButton" => new FloatingActionButton(context, attrs),
             _ => base.OnCreateView(parent, name, context, attrs),
         };
 
