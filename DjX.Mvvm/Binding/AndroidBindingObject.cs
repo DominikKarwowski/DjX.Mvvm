@@ -1,6 +1,5 @@
 ﻿#if ANDROID21_0_OR_GREATER
 using Android.Views;
-using DjX.Mvvm.Commands.Abstractions;
 using DjX.Mvvm.ViewModels;
 using System.Reflection;
 
