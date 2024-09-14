@@ -10,10 +10,7 @@ public abstract class ViewModelBase : INotifyPropertyChanged, INavigable
     public event PropertyChangedEventHandler? PropertyChanged;
     public event Action<Type>? NavigationRequested;
 
-    public virtual void OnViewModelDestroy()
-    {
-        DisposeAsyncCommands();
-    }
+    public virtual void OnViewModelDestroy() => this.DisposeAsyncCommands();
 
     protected void RaisePropertyChanged([CallerMemberName] string? propertyName = null) =>
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
@@ -23,7 +20,7 @@ public abstract class ViewModelBase : INotifyPropertyChanged, INavigable
 
     private void DisposeAsyncCommands()
     {
-        var commands = GetType().GetProperties()
+        var commands = this.GetType().GetProperties()
             .Where(p =>
                 p.PropertyType == typeof(IDjXAsyncCommand)
                 || p.PropertyType.IsGenericType && p.PropertyType.GetGenericTypeDefinition() == typeof(IDjXAsyncCommand<>))

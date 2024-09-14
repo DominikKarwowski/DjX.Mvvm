@@ -10,16 +10,16 @@ public sealed class AndroidBindingObject : IDisposable
     private List<AndroidPropertyBindingSet> PropertyBindings { get; } = [];
     private List<AndroidEventBindingSet> EventBindings { get; } = [];
 
-    public void RegisterPropertyBindingSet(ViewModelBase sourceObject, View targetObject, string bindingDeclaration) =>
-        RegisterBindingSet(sourceObject, targetObject, bindingDeclaration, RegisterPropertyBindingSet);
+    public void RegisterPropertyBindingSet(ViewModelBase sourceObject, View targetObject, string bindingDeclaration)
+        => RegisterBindingSet(sourceObject, targetObject, bindingDeclaration, this.RegisterPropertyBindingSet);
 
-    public void RegisterEventBindingSet(ViewModelBase sourceObject, View targetObject, string bindingDeclaration) =>
-        RegisterBindingSet(sourceObject, targetObject, bindingDeclaration, RegisterEventBindingSet);
+    public void RegisterEventBindingSet(ViewModelBase sourceObject, View targetObject, string bindingDeclaration)
+        => RegisterBindingSet(sourceObject, targetObject, bindingDeclaration, this.RegisterEventBindingSet);
 
     public void Dispose()
     {
-        PropertyBindings.ForEach(pb => pb.Dispose());
-        EventBindings.ForEach(eb => eb.Dispose());
+        this.PropertyBindings.ForEach(pb => pb.Dispose());
+        this.EventBindings.ForEach(eb => eb.Dispose());
     }
 
     private static void RegisterBindingSet(ViewModelBase sourceObject, View targetObject, string bindingDeclaration,
@@ -39,7 +39,7 @@ public sealed class AndroidBindingObject : IDisposable
         if (sourceProperty is not null)
         {
             var propertyBinding = new AndroidPropertyBindingSet(sourceObject, parsedBinding.SourceMemberName, targetObject, parsedBinding.TargetMemberName);
-            PropertyBindings.Add(propertyBinding);
+            this.PropertyBindings.Add(propertyBinding);
         }
     }
 
@@ -48,7 +48,7 @@ public sealed class AndroidBindingObject : IDisposable
         if (sourceProperty is not null)
         {
             var eventBinding = new AndroidEventBindingSet(sourceObject, parsedBinding.SourceMemberName, targetObject, parsedBinding.TargetMemberName);
-            EventBindings.Add(eventBinding);
+            this.EventBindings.Add(eventBinding);
         }
     }
 
@@ -56,12 +56,7 @@ public sealed class AndroidBindingObject : IDisposable
     {
         var bindingParts = bindingDeclaration.Split(' ');
 
-        if (bindingParts.Length != 2)
-        {
-            return null;
-        }
-
-        return new ParsedBinding(bindingParts[1], bindingParts[0]);
+        return bindingParts.Length != 2 ? null : new ParsedBinding(bindingParts[1], bindingParts[0]);
     }
 }
 
