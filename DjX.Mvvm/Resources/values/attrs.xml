@@ -1,8 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <resources>
 	<declare-styleable name="View">
-		<attr name="bind_property" format="string"/>
-		<attr name="bind_event" format="string"/>
+		<attr name="bind" format="string"/>
 		<attr name="item_source" format="string"/>
 		<attr name="item_template" format="reference"/>
 	</declare-styleable>

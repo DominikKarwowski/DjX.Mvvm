@@ -6,7 +6,6 @@ using DjX.Mvvm.Binding;
 using DjX.Mvvm.Resources;
 using DjX.Mvvm.ViewModels;
 using System.Collections.ObjectModel;
-using System.Collections.Specialized;
 using System.Xml;
 
 namespace DjX.Mvvm.Platforms.Android;
@@ -58,7 +57,7 @@ public class BindableRecyclerViewAdapter<TCollectionDataType> : RecyclerView.Ada
         foreach (var kvp in this._elementBindingsToParse)
         {
             var view = bindableHolder.View.FindViewById(kvp.Key)!;
-            bindableHolder.BindingObject.RegisterBindingSet(this.DataSet[position], view, kvp.Value);
+            bindableHolder.BindingObject.RegisterDeclaredBindings(this.DataSet[position], view, kvp.Value);
         }
     }
 

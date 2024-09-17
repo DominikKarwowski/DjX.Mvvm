@@ -70,7 +70,7 @@ namespace DjX.Mvvm.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to bind_property.
+        ///   Looks up a localized string similar to bind.
         /// </summary>
         internal static string BindAttributeName {
             get {
@@ -84,6 +84,24 @@ namespace DjX.Mvvm.Resources {
         internal static string IdAttributeName {
             get {
                 return ResourceManager.GetString("IdAttributeName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to item_source.
+        /// </summary>
+        internal static string ItemSourceAttributeName {
+            get {
+                return ResourceManager.GetString("ItemSourceAttributeName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to item_template.
+        /// </summary>
+        internal static string ItemTemplateAttributeName {
+            get {
+                return ResourceManager.GetString("ItemTemplateAttributeName", resourceCulture);
             }
         }
         

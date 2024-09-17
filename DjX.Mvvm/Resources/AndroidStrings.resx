@@ -127,6 +127,12 @@
     <value>id</value>
   </data>
   <data name="BindAttributeName" xml:space="preserve">
-    <value>bind_property</value>
+    <value>bind</value>
+  </data>
+  <data name="ItemSourceAttributeName" xml:space="preserve">
+    <value>item_source</value>
+  </data>
+  <data name="ItemTemplateAttributeName" xml:space="preserve">
+    <value>item_template</value>
   </data>
 </root>

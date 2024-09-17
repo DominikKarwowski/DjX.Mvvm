@@ -39,19 +39,13 @@ public abstract class DjXActivityBase<T> : AppCompatActivity
             return view;
         }
 
-        var propertyBindingToParse = attrs.GetAttributeValue(AndroidStrings.AppNamespace, AndroidStrings.BindAttributeName);
-        var eventBindingToParse = attrs.GetAttributeValue(AndroidStrings.AppNamespace, "bind_event");
-        var collectionToBind = attrs.GetAttributeValue(AndroidStrings.AppNamespace, "item_source");
-        var templateResourceId = attrs.GetAttributeResourceValue(AndroidStrings.AppNamespace, "item_template", 0);
+        var bindingsToParse = attrs.GetAttributeValue(AndroidStrings.AppNamespace, AndroidStrings.BindAttributeName);
+        var collectionToBind = attrs.GetAttributeValue(AndroidStrings.AppNamespace, AndroidStrings.ItemSourceAttributeName);
+        var templateResourceId = attrs.GetAttributeResourceValue(AndroidStrings.AppNamespace, AndroidStrings.ItemTemplateAttributeName, 0);
 
-        if (propertyBindingToParse is not null)
+        if (bindingsToParse is not null)
         {
-            this.bindingObject.RegisterBindingSet(this.ViewModel, view, propertyBindingToParse);
-        }
-
-        if (eventBindingToParse is not null)
-        {
-            this.bindingObject.RegisterBindingSet(this.ViewModel, view, eventBindingToParse);
+            this.bindingObject.RegisterDeclaredBindings(this.ViewModel, view, bindingsToParse);
         }
 
         if (view is RecyclerView recyclerView && collectionToBind is not null && templateResourceId is not 0)
