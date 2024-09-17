@@ -16,46 +16,46 @@ public class DjXAsyncDelegateCommand<T> : IDjXAsyncCommand<T>, IDisposable
     public DjXAsyncDelegateCommand(Func<T?, Task> execute, Func<T?, bool>? canExecute = null)
     {
         ArgumentNullException.ThrowIfNull(execute);
-        _execute = execute;
-        _canExecute = canExecute;
+        this._execute = execute;
+        this._canExecute = canExecute;
     }
 
     public void RaiseCanExecuteChanged() => CanExecuteChanged?.Invoke(this, EventArgs.Empty);
 
     public event EventHandler? CanExecuteChanged;
 
-    public bool CanExecute(object? parameter) => _canExecute is null || _canExecute((T?)parameter);
-    public async void Execute(object? parameter) => await ExecuteAsync((T?)parameter);
+    public bool CanExecute(object? parameter) => this._canExecute is null || this._canExecute((T?)parameter);
+    public async void Execute(object? parameter) => await this.ExecuteAsync((T?)parameter);
 
     public async Task ExecuteAsync(T? parameter)
     {
-        await _semaphore.WaitAsync();
+        await this._semaphore.WaitAsync();
         try
         {
-            await _execute(parameter);
+            await this._execute(parameter);
         }
         finally
         {
-            _semaphore.Release();
+            _ = this._semaphore.Release();
         }
     }
 
     protected virtual void Dispose(bool disposing)
     {
-        if (!disposedValue)
+        if (!this.disposedValue)
         {
             if (disposing)
             {
-                _semaphore.Dispose();
+                this._semaphore.Dispose();
             }
 
-            disposedValue = true;
+            this.disposedValue = true;
         }
     }
 
     public void Dispose()
     {
-        Dispose(disposing: true);
+        this.Dispose(disposing: true);
         GC.SuppressFinalize(this);
     }
 }
@@ -70,8 +70,8 @@ public class DjXAsyncDelegateCommand : IDjXAsyncCommand, IDisposable
     public DjXAsyncDelegateCommand(Func<Task> execute, Func<bool>? canExecute = null)
     {
         ArgumentNullException.ThrowIfNull(execute);
-        _execute = new Func<object?, Task>(param => execute());
-        _canExecute = canExecute is null
+        this._execute = new Func<object?, Task>(param => execute());
+        this._canExecute = canExecute is null
             ? null
             : new Func<object?, bool>(param => canExecute());
     }
@@ -79,46 +79,46 @@ public class DjXAsyncDelegateCommand : IDjXAsyncCommand, IDisposable
     public DjXAsyncDelegateCommand(Func<object?, Task> execute, Func<object?, bool>? canExecute = null)
     {
         ArgumentNullException.ThrowIfNull(execute);
-        _execute = execute;
-        _canExecute = canExecute;
+        this._execute = execute;
+        this._canExecute = canExecute;
     }
 
     public void RaiseCanExecuteChanged() => CanExecuteChanged?.Invoke(this, EventArgs.Empty);
 
     public event EventHandler? CanExecuteChanged;
 
-    public bool CanExecute(object? parameter) => _canExecute is null || _canExecute(parameter);
-    public async void Execute(object? parameter) => await ExecuteAsync();
+    public bool CanExecute(object? parameter) => this._canExecute is null || this._canExecute(parameter);
+    public async void Execute(object? parameter) => await this.ExecuteAsync();
 
     public async Task ExecuteAsync()
     {
-        await _semaphore.WaitAsync();
+        await this._semaphore.WaitAsync();
         try
         {
-            await _execute(null);
+            await this._execute(null);
         }
         finally
         {
-            _semaphore.Release();
+            _ = this._semaphore.Release();
         }
     }
 
     protected virtual void Dispose(bool disposing)
     {
-        if (!disposedValue)
+        if (!this.disposedValue)
         {
             if (disposing)
             {
-                _semaphore.Dispose();
+                this._semaphore.Dispose();
             }
 
-            disposedValue = true;
+            this.disposedValue = true;
         }
     }
 
     public void Dispose()
     {
-        Dispose(disposing: true);
+        this.Dispose(disposing: true);
         GC.SuppressFinalize(this);
     }
 }

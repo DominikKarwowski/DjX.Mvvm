@@ -4,13 +4,16 @@ using Android.Util;
 using Android.Views;
 using AndroidX.AppCompat.App;
 using AndroidX.AppCompat.Widget;
+using AndroidX.RecyclerView.Widget;
 using DjX.Mvvm.Binding;
 using DjX.Mvvm.Navigation;
 using DjX.Mvvm.Platforms.Android;
+using DjX.Mvvm.Resources;
 using DjX.Mvvm.ViewModels;
 using DjX.Mvvm.ViewModels.Attributes;
 using Google.Android.Material.FloatingActionButton;
 using Google.Android.Material.TextView;
+using System.Collections.ObjectModel;
 using System.Reflection;
 
 namespace DjX.Mvvm.Views;
@@ -29,23 +32,25 @@ public abstract class DjXActivityBase<T> : AppCompatActivity
 
     public override View? OnCreateView(View? parent, string name, Context context, IAttributeSet attrs)
     {
-        var namespaceUri = "http://schemas.android.com/apk/res-auto";
-        var propertyBindingToParse = attrs.GetAttributeValue(namespaceUri, "bind_property");
-        var eventBindingToParse = attrs.GetAttributeValue(namespaceUri, "bind_event");
+        var view = this.CreateView(parent, name, context, attrs);
 
-        View? view = this.CreateView(parent, name, context, attrs);
-
-        if (view is not null)
+        if (view is null)
         {
-            if (propertyBindingToParse is not null)
-            {
-                bindingObject.RegisterPropertyBindingSet(ViewModel, view, propertyBindingToParse);
-            }
+            return view;
+        }
 
-            if (eventBindingToParse is not null)
-            {
-                bindingObject.RegisterEventBindingSet(ViewModel, view, eventBindingToParse);
-            }
+        var bindingsToParse = attrs.GetAttributeValue(AndroidStrings.AppNamespace, AndroidStrings.BindAttributeName);
+        var collectionToBind = attrs.GetAttributeValue(AndroidStrings.AppNamespace, AndroidStrings.ItemSourceAttributeName);
+        var templateResourceId = attrs.GetAttributeResourceValue(AndroidStrings.AppNamespace, AndroidStrings.ItemTemplateAttributeName, 0);
+
+        if (bindingsToParse is not null)
+        {
+            this.bindingObject.RegisterDeclaredBindings(this.ViewModel, view, bindingsToParse);
+        }
+
+        if (view is RecyclerView recyclerView && collectionToBind is not null && templateResourceId is not 0)
+        {
+            this.bindingObject.RegisterCollectionBindingSet(this.ViewModel, collectionToBind, recyclerView, templateResourceId);
         }
 
         return view;
@@ -53,31 +58,29 @@ public abstract class DjXActivityBase<T> : AppCompatActivity
 
     protected override void OnCreate(Bundle? savedInstanceState)
     {
-        if (Application is DjXApplication djXApplication)
-        {
-            ViewModel = djXApplication.CreateViewModel<T>();
-            navigationService = djXApplication.GetNavigationService() as AndroidNavigationService;
-
-            ViewModel.NavigationRequested += NavigateTo;
-        }
-        else
+        if (this.Application is not DjXApplication djXApplication)
         {
             throw new InvalidOperationException($"Application must be of type {nameof(DjXApplication)}");
         }
+
+        this.ViewModel = djXApplication.CreateViewModel<T>();
+        this.navigationService = djXApplication.GetNavigationService() as AndroidNavigationService;
+
+        this.ViewModel.NavigationRequested += this.NavigateTo;
 
         base.OnCreate(savedInstanceState);
     }
 
     protected override void OnDestroy()
     {
-        ViewModel.NavigationRequested -= NavigateTo;
-        ViewModel.OnViewModelDestroy();
-        bindingObject.Dispose();
+        this.ViewModel.NavigationRequested -= this.NavigateTo;
+        this.ViewModel.OnViewModelDestroy();
+        this.bindingObject.Dispose();
         base.OnDestroy();
     }
 
-    private View? CreateView(View? parent, string name, Context context, IAttributeSet attrs) =>
-        name switch
+    private View? CreateView(View? parent, string name, Context context, IAttributeSet attrs)
+        => name switch
         {
             "EditText" => new EditText(context, attrs),
             "TextView" => new TextView(context, attrs),
@@ -86,17 +89,18 @@ public abstract class DjXActivityBase<T> : AppCompatActivity
             "androidx.appcompat.widget.AppCompatEditText" => new AppCompatEditText(context, attrs),
             "androidx.appcompat.widget.AppCompatButton" => new AppCompatButton(context, attrs),
             "com.google.android.material.floatingactionbutton.FloatingActionButton" => new FloatingActionButton(context, attrs),
+            "androidx.recyclerview.widget.RecyclerView" => new RecyclerView(context, attrs),
             _ => base.OnCreateView(parent, name, context, attrs),
         };
 
     private void NavigateTo(Type viewModelType)
     {
-        Type? viewType = GetViewForViewModel(viewModelType);
+        Type? viewType = this.GetViewForViewModel(viewModelType);
 
         if (viewType is not null)
         {
             var intent = new Intent(this, viewType);
-            StartActivity(intent);
+            this.StartActivity(intent);
         }
     }
 
@@ -104,33 +108,33 @@ public abstract class DjXActivityBase<T> : AppCompatActivity
     {
         var linkedViewAttr = viewModelType.GetCustomAttribute<LinkedViewAttribute>();
 
-        if (string.IsNullOrWhiteSpace(navigationService?.ViewsNamespace)
+        if (string.IsNullOrWhiteSpace(this.navigationService?.ViewsNamespace)
             || string.IsNullOrWhiteSpace(linkedViewAttr?.ViewName))
         {
             return default;
         }
 
         var viewName = string.Join(".",
-            navigationService.ViewsNamespace,
+            this.navigationService.ViewsNamespace,
             linkedViewAttr.ViewName);
 
-        var assembly = navigationService.AndroidExecutingAssembly ?? TryResolveExecutingAssembly();
+        var assembly = this.navigationService.AndroidExecutingAssembly ?? this.TryResolveExecutingAssembly();
 
         return assembly?.GetType(viewName);
     }
 
     private Assembly? TryResolveExecutingAssembly()
     {
-        if (navigationService is null)
+        if (this.navigationService is null)
             return default;
 
         var assembly = AppDomain.CurrentDomain
             .GetAssemblies()
             .Where(a =>
-                a.FullName?.StartsWith(navigationService.ViewsAssemblyName) ?? false)
+                a.FullName?.StartsWith(this.navigationService.ViewsAssemblyName) ?? false)
             .FirstOrDefault();
 
-        navigationService.AndroidExecutingAssembly = assembly;
+        this.navigationService.AndroidExecutingAssembly = assembly;
 
         return assembly;
     }
