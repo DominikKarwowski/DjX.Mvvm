@@ -3,5 +3,7 @@
 	<declare-styleable name="View">
 		<attr name="bind_property" format="string"/>
 		<attr name="bind_event" format="string"/>
+		<attr name="item_source" format="string"/>
+		<attr name="item_template" format="reference"/>
 	</declare-styleable>
 </resources>

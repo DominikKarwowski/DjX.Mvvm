@@ -2,27 +2,19 @@
 
 namespace DjX.Mvvm.Binding.Abstractions;
 
-public abstract class BindingSet<TTargetType> : IDisposable
+public abstract class BindingSet<TTargetType>(INotifyPropertyChanged sourceObject, string sourceMemberName, TTargetType targetObject, string targetMemberName) : IDisposable
     where TTargetType : class
 {
-    protected readonly INotifyPropertyChanged SourceObject;
-    protected readonly string SourceMemberName;
-    protected readonly TTargetType TargetObject;
-    protected readonly string TargetMemberName;
-
-    public BindingSet(INotifyPropertyChanged sourceObject, string sourceMemberName, TTargetType targetObject, string targetMemberName)
-    {
-        SourceObject = sourceObject;
-        SourceMemberName = sourceMemberName;
-        TargetObject = targetObject;
-        TargetMemberName = targetMemberName;
-    }
+    protected readonly INotifyPropertyChanged SourceObject = sourceObject;
+    protected readonly string SourceMemberName = sourceMemberName;
+    protected readonly TTargetType TargetObject = targetObject;
+    protected readonly string TargetMemberName = targetMemberName;
 
     protected abstract void Dispose(bool disposing);
 
     public void Dispose()
     {
-        Dispose(disposing: true);
+        this.Dispose(disposing: true);
         GC.SuppressFinalize(this);
     }
 }

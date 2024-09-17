@@ -12,6 +12,7 @@ using DjX.Mvvm.ViewModels;
 using DjX.Mvvm.ViewModels.Attributes;
 using Google.Android.Material.FloatingActionButton;
 using Google.Android.Material.TextView;
+using System.Collections.ObjectModel;
 using System.Reflection;
 
 namespace DjX.Mvvm.Views;
@@ -40,6 +41,9 @@ public abstract class DjXActivityBase<T> : AppCompatActivity
         var namespaceUri = "http://schemas.android.com/apk/res-auto";
         var propertyBindingToParse = attrs.GetAttributeValue(namespaceUri, "bind_property");
         var eventBindingToParse = attrs.GetAttributeValue(namespaceUri, "bind_event");
+        var collectionToBind = attrs.GetAttributeValue(namespaceUri, "item_source");
+        var templateResourceId = attrs.GetAttributeResourceValue(namespaceUri, "item_template", 0);
+
 
         if (propertyBindingToParse is not null)
         {
@@ -49,6 +53,11 @@ public abstract class DjXActivityBase<T> : AppCompatActivity
         if (eventBindingToParse is not null)
         {
             this.bindingObject.RegisterEventBindingSet(this.ViewModel, view, eventBindingToParse);
+        }
+
+        if (view is RecyclerView recyclerView && collectionToBind is not null && templateResourceId is not 0)
+        {
+            this.bindingObject.RegisterCollectionBindingSet(this.ViewModel, collectionToBind, recyclerView, templateResourceId);
         }
 
         return view;

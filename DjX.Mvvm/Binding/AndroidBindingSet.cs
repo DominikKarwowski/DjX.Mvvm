@@ -14,12 +14,15 @@ public sealed class AndroidPropertyBindingSet : BindingSet<View>
     public AndroidPropertyBindingSet(INotifyPropertyChanged sourceObject, string sourceMemberName, View targetObject, string targetMemberName)
         : base(sourceObject, sourceMemberName, targetObject, targetMemberName)
     {
+        // TODO: cache data obtained by reflection and use them for more efficient event execution and resource disposing
         this.SourceObject.PropertyChanged += this.OnSourcePropertyChanged;
 
         if (this.TargetObject is EditText editText)
         {
             editText.TextChanged += this.EditText_TextChanged;
         }
+
+        this.OnSourcePropertyChanged(this.SourceObject, new PropertyChangedEventArgs(sourceMemberName));
     }
 
     private void OnSourcePropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -68,9 +71,8 @@ public sealed class AndroidEventBindingSet : BindingSet<View>
 
     public AndroidEventBindingSet(INotifyPropertyChanged sourceObject, string sourceMemberName, View targetObject, string targetMemberName)
         : base(sourceObject, sourceMemberName, targetObject, targetMemberName)
-    {
-        this.TargetObject.GetType().GetEvent(this.TargetMemberName)?.AddEventHandler(this.TargetObject, this.OnTargetEventRaisedDelegate);
-    }
+        // TODO: cache data obtained by reflection and use them for more efficient event execution and resource disposing
+        => this.TargetObject.GetType().GetEvent(this.TargetMemberName)?.AddEventHandler(this.TargetObject, this.OnTargetEventRaisedDelegate);
 
     public EventHandler? OnTargetEventRaisedDelegate => this.OnTargetEventRaised;
 
