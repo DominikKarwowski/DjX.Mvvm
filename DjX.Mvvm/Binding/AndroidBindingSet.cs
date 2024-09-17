@@ -8,18 +8,17 @@ using System.Reflection;
 
 namespace DjX.Mvvm.Binding;
 
-public sealed class AndroidPropertyBindingSet : BindingSet<View>
+public sealed class AndroidPropertyBindingSet : BindingSet<View, PropertyInfo>
 {
-    private readonly PropertyInfo? sourceProperty;
-    private readonly PropertyInfo? targetProperty;
     private bool disposedValue;
 
-    public AndroidPropertyBindingSet(INotifyPropertyChanged sourceObject, string sourceMemberName, View targetObject, string targetMemberName)
-        : base(sourceObject, sourceMemberName, targetObject, targetMemberName)
+    public AndroidPropertyBindingSet(
+        INotifyPropertyChanged sourceObject,
+        PropertyInfo sourceMemberInfo,
+        View targetObject,
+        PropertyInfo targetMemberName)
+        : base(sourceObject, sourceMemberInfo, targetObject, targetMemberName)
     {
-        this.sourceProperty = this.SourceObject.GetType().GetProperty(this.SourceMemberName);
-        this.targetProperty = this.TargetObject.GetType().GetProperty(this.TargetMemberName);
-
         this.SourceObject.PropertyChanged += this.OnSourcePropertyChanged;
 
         if (this.TargetObject is EditText editText)
@@ -27,19 +26,18 @@ public sealed class AndroidPropertyBindingSet : BindingSet<View>
             editText.TextChanged += this.EditText_TextChanged;
         }
 
-        this.OnSourcePropertyChanged(this.SourceObject, new PropertyChangedEventArgs(sourceMemberName));
+        this.OnSourcePropertyChanged(this.SourceObject, new PropertyChangedEventArgs(sourceMemberInfo.Name));
     }
 
     private void OnSourcePropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
-        if (e.PropertyName == this.SourceMemberName
-            && this.targetProperty is not null)
+        if (e.PropertyName == this.SourceMemberInfo.Name)
         {
-            var sourceValue = this.sourceProperty?.GetValue(this.SourceObject);
-            var currentTargetValue = this.targetProperty.GetValue(this.TargetObject);
+            var sourceValue = this.SourceMemberInfo.GetValue(this.SourceObject);
+            var currentTargetValue = this.TargetMemberInfo.GetValue(this.TargetObject);
             if (!Equals(currentTargetValue, sourceValue))
             {
-                this.targetProperty.SetValue(this.TargetObject, sourceValue);
+                this.TargetMemberInfo.SetValue(this.TargetObject, sourceValue);
             }
         }
     }
@@ -48,7 +46,7 @@ public sealed class AndroidPropertyBindingSet : BindingSet<View>
     {
         if (e.Text is not null)
         {
-            this.sourceProperty?.SetValue(this.SourceObject, string.Join("", e.Text));
+            this.SourceMemberInfo.SetValue(this.SourceObject, string.Join("", e.Text));
         }
     }
 
@@ -70,26 +68,23 @@ public sealed class AndroidPropertyBindingSet : BindingSet<View>
     }
 }
 
-public sealed class AndroidEventBindingSet : BindingSet<View>
+public sealed class AndroidEventBindingSet : BindingSet<View, EventInfo>
 {
-    private readonly PropertyInfo? sourceProperty;
-    private readonly EventInfo? targetEvent;
     private bool disposedValue;
 
-    public AndroidEventBindingSet(INotifyPropertyChanged sourceObject, string sourceMemberName, View targetObject, string targetMemberName)
-        : base(sourceObject, sourceMemberName, targetObject, targetMemberName)
-    {
-        this.sourceProperty = this.SourceObject.GetType().GetProperty(this.SourceMemberName);
-        this.targetEvent = this.TargetObject.GetType().GetEvent(this.TargetMemberName);
-
-        this.targetEvent?.AddEventHandler(this.TargetObject, this.OnTargetEventRaisedDelegate);
-    }
+    public AndroidEventBindingSet(
+        INotifyPropertyChanged sourceObject,
+        PropertyInfo sourceMemberInfo,
+        View targetObject,
+        EventInfo targetMemberInfo)
+        : base(sourceObject, sourceMemberInfo, targetObject, targetMemberInfo)
+        => this.TargetMemberInfo.AddEventHandler(this.TargetObject, this.OnTargetEventRaisedDelegate);
 
     public EventHandler? OnTargetEventRaisedDelegate => this.OnTargetEventRaised;
 
     private void OnTargetEventRaised(object? sender, EventArgs e)
     {
-        var command = this.sourceProperty?.GetValue(this.SourceObject) as IDjXCommand;
+        var command = this.SourceMemberInfo.GetValue(this.SourceObject) as IDjXCommand;
         if (command?.CanExecute(null) ?? false)
         {
             command.Execute();
@@ -102,7 +97,7 @@ public sealed class AndroidEventBindingSet : BindingSet<View>
         {
             if (disposing)
             {
-                this.targetEvent?.RemoveEventHandler(this.TargetObject, this.OnTargetEventRaisedDelegate);
+                this.TargetMemberInfo.RemoveEventHandler(this.TargetObject, this.OnTargetEventRaisedDelegate);
             }
             this.disposedValue = true;
         }

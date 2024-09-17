@@ -8,6 +8,7 @@ using AndroidX.RecyclerView.Widget;
 using DjX.Mvvm.Binding;
 using DjX.Mvvm.Navigation;
 using DjX.Mvvm.Platforms.Android;
+using DjX.Mvvm.Resources;
 using DjX.Mvvm.ViewModels;
 using DjX.Mvvm.ViewModels.Attributes;
 using Google.Android.Material.FloatingActionButton;
@@ -38,21 +39,19 @@ public abstract class DjXActivityBase<T> : AppCompatActivity
             return view;
         }
 
-        var namespaceUri = "http://schemas.android.com/apk/res-auto";
-        var propertyBindingToParse = attrs.GetAttributeValue(namespaceUri, "bind_property");
-        var eventBindingToParse = attrs.GetAttributeValue(namespaceUri, "bind_event");
-        var collectionToBind = attrs.GetAttributeValue(namespaceUri, "item_source");
-        var templateResourceId = attrs.GetAttributeResourceValue(namespaceUri, "item_template", 0);
-
+        var propertyBindingToParse = attrs.GetAttributeValue(AndroidStrings.AppNamespace, AndroidStrings.BindAttributeName);
+        var eventBindingToParse = attrs.GetAttributeValue(AndroidStrings.AppNamespace, "bind_event");
+        var collectionToBind = attrs.GetAttributeValue(AndroidStrings.AppNamespace, "item_source");
+        var templateResourceId = attrs.GetAttributeResourceValue(AndroidStrings.AppNamespace, "item_template", 0);
 
         if (propertyBindingToParse is not null)
         {
-            this.bindingObject.RegisterPropertyBindingSet(this.ViewModel, view, propertyBindingToParse);
+            this.bindingObject.RegisterBindingSet(this.ViewModel, view, propertyBindingToParse);
         }
 
         if (eventBindingToParse is not null)
         {
-            this.bindingObject.RegisterEventBindingSet(this.ViewModel, view, eventBindingToParse);
+            this.bindingObject.RegisterBindingSet(this.ViewModel, view, eventBindingToParse);
         }
 
         if (view is RecyclerView recyclerView && collectionToBind is not null && templateResourceId is not 0)

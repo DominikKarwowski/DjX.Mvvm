@@ -15,11 +15,39 @@ public sealed class AndroidBindingObject : IDisposable
     private List<AndroidEventBindingSet> EventBindings { get; } = [];
     private List<AndroidRecyclerViewCollectionBindingSet> CollectionBindings { get; } = [];
 
-    public void RegisterPropertyBindingSet(ViewModelBase sourceObject, View targetObject, string bindingDeclaration)
-        => RegisterBindingSet(sourceObject, targetObject, bindingDeclaration, this.RegisterPropertyBindingSet);
+    public void RegisterBindingSet(ViewModelBase sourceObject, View targetObject, string bindingDeclaration)
+    {
+        var parsedBinding = ParseBindingDeclaration(bindingDeclaration);
 
-    public void RegisterEventBindingSet(ViewModelBase sourceObject, View targetObject, string bindingDeclaration)
-        => RegisterBindingSet(sourceObject, targetObject, bindingDeclaration, this.RegisterEventBindingSet);
+        if (parsedBinding is null)
+        {
+            return;
+        }
+
+        var sourceProperty = sourceObject.GetType().GetProperty(parsedBinding.SourceMemberName);
+
+        if (sourceProperty is null)
+        {
+            return;
+        }
+
+        var targetMembers = targetObject.GetType().GetMember(parsedBinding.TargetMemberName);
+
+        foreach (var targetMember in targetMembers)
+        {
+            if (targetMember is PropertyInfo targetProperty)
+            {
+                this.PropertyBindings.Add(
+                    new AndroidPropertyBindingSet(sourceObject, sourceProperty, targetObject, targetProperty));
+            }
+
+            if (targetMember is EventInfo targetEvent)
+            {
+                this.EventBindings.Add(
+                    new AndroidEventBindingSet(sourceObject, sourceProperty, targetObject, targetEvent));
+            }
+        }
+    }
 
     public void RegisterCollectionBindingSet(
         ViewModelBase sourceObject,
@@ -60,45 +88,6 @@ public sealed class AndroidBindingObject : IDisposable
         this.EventBindings.ForEach(eb => eb.Dispose());
         this.CollectionBindings.ForEach(cb => cb.Dispose());
     }
-
-    private static void RegisterBindingSet(
-        ViewModelBase sourceObject,
-        View targetObject,
-        string bindingDeclaration,
-        Action<ViewModelBase, View, ParsedBinding, PropertyInfo?> registerBindingSet)
-    {
-        var parsedBinding = ParseBindingDeclaration(bindingDeclaration);
-
-        if (parsedBinding is null)
-        {
-            return;
-        }
-
-        var sourceProperty = sourceObject.GetType().GetProperty(parsedBinding.SourceMemberName);
-
-        if (sourceProperty is null)
-        {
-            return;
-        }
-
-        registerBindingSet(sourceObject, targetObject, parsedBinding, sourceProperty);
-    }
-
-    private void RegisterPropertyBindingSet(
-        ViewModelBase sourceObject,
-        View targetObject,
-        ParsedBinding parsedBinding,
-        PropertyInfo? sourceProperty)
-        => this.PropertyBindings.Add(
-            new AndroidPropertyBindingSet(sourceObject, parsedBinding.SourceMemberName, targetObject, parsedBinding.TargetMemberName));
-
-    private void RegisterEventBindingSet(
-        ViewModelBase sourceObject,
-        View targetObject,
-        ParsedBinding parsedBinding,
-        PropertyInfo? sourceProperty)
-        => this.EventBindings.Add(
-            new AndroidEventBindingSet(sourceObject, parsedBinding.SourceMemberName, targetObject, parsedBinding.TargetMemberName));
 
     private static ParsedBinding? ParseBindingDeclaration(string bindingDeclaration)
     {

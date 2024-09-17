@@ -1,14 +1,20 @@
 ﻿using System.ComponentModel;
+using System.Reflection;
 
 namespace DjX.Mvvm.Binding.Abstractions;
 
-public abstract class BindingSet<TTargetType>(INotifyPropertyChanged sourceObject, string sourceMemberName, TTargetType targetObject, string targetMemberName) : IDisposable
+public abstract class BindingSet<TTargetType, TTargetMemberInfo>(
+    INotifyPropertyChanged sourceObject,
+    PropertyInfo sourceMemberInfo,
+    TTargetType targetObject,
+    TTargetMemberInfo targetMemberInfo) : IDisposable
     where TTargetType : class
+    where TTargetMemberInfo : MemberInfo
 {
     protected readonly INotifyPropertyChanged SourceObject = sourceObject;
-    protected readonly string SourceMemberName = sourceMemberName;
+    protected readonly PropertyInfo SourceMemberInfo = sourceMemberInfo;
     protected readonly TTargetType TargetObject = targetObject;
-    protected readonly string TargetMemberName = targetMemberName;
+    protected readonly TTargetMemberInfo TargetMemberInfo = targetMemberInfo;
 
     protected abstract void Dispose(bool disposing);
 

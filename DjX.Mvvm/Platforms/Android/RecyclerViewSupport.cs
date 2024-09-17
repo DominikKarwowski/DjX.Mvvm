@@ -3,6 +3,7 @@ using Android.Content;
 using Android.Views;
 using AndroidX.RecyclerView.Widget;
 using DjX.Mvvm.Binding;
+using DjX.Mvvm.Resources;
 using DjX.Mvvm.ViewModels;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
@@ -57,7 +58,7 @@ public class BindableRecyclerViewAdapter<TCollectionDataType> : RecyclerView.Ada
         foreach (var kvp in this._elementBindingsToParse)
         {
             var view = bindableHolder.View.FindViewById(kvp.Key)!;
-            bindableHolder.BindingObject.RegisterPropertyBindingSet(this.DataSet[position], view, kvp.Value);
+            bindableHolder.BindingObject.RegisterBindingSet(this.DataSet[position], view, kvp.Value);
         }
     }
 
@@ -84,13 +85,6 @@ public class BindableRecyclerViewAdapter<TCollectionDataType> : RecyclerView.Ada
 
         _ = viewXml.MoveToContent();
 
-        // TODO: move to constant string resources
-        var androidNamespace = "http://schemas.android.com/apk/res/android";
-        var idAttribute = "id";
-        var appNamespace = "http://schemas.android.com/apk/res-auto";
-        var bindPropertyAttribute = "bind_property";
-        //
-
         while (viewXml.Read())
         {
             if (viewXml.NodeType != XmlNodeType.Element)
@@ -98,8 +92,8 @@ public class BindableRecyclerViewAdapter<TCollectionDataType> : RecyclerView.Ada
                 continue;
             }
 
-            var idAttr = viewXml.GetAttribute(idAttribute, androidNamespace);
-            var bindAttr = viewXml.GetAttribute(bindPropertyAttribute, appNamespace);
+            var idAttr = viewXml.GetAttribute(AndroidStrings.IdAttributeName, AndroidStrings.Namespace);
+            var bindAttr = viewXml.GetAttribute(AndroidStrings.BindAttributeName, AndroidStrings.AppNamespace);
 
             if (idAttr is not null && bindAttr is not null)
             {

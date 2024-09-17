@@ -36,4 +36,19 @@
 	  </PackageReference>
 	</ItemGroup>
 
+	<ItemGroup>
+	  <Compile Update="Resources\AndroidStrings.Designer.cs">
+	    <DesignTime>True</DesignTime>
+	    <AutoGen>True</AutoGen>
+	    <DependentUpon>AndroidStrings.resx</DependentUpon>
+	  </Compile>
+	</ItemGroup>
+
+	<ItemGroup>
+	  <EmbeddedResource Update="Resources\AndroidStrings.resx">
+	    <Generator>ResXFileCodeGenerator</Generator>
+	    <LastGenOutput>AndroidStrings.Designer.cs</LastGenOutput>
+	  </EmbeddedResource>
+	</ItemGroup>
+
 </Project>
