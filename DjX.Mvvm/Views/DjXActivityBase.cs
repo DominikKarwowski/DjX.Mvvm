@@ -13,7 +13,6 @@ using DjX.Mvvm.ViewModels;
 using DjX.Mvvm.ViewModels.Attributes;
 using Google.Android.Material.FloatingActionButton;
 using Google.Android.Material.TextView;
-using System.Collections.ObjectModel;
 using System.Reflection;
 
 namespace DjX.Mvvm.Views;
@@ -66,14 +65,16 @@ public abstract class DjXActivityBase<T> : AppCompatActivity
         this.ViewModel = djXApplication.CreateViewModel<T>();
         this.navigationService = djXApplication.GetNavigationService() as AndroidNavigationService;
 
-        this.ViewModel.NavigationRequested += this.NavigateTo;
+        this.ViewModel.NavigationToRequested += this.NavigateTo;
+        this.ViewModel.NavigationCloseRequested += this.NavigateClose;
 
         base.OnCreate(savedInstanceState);
     }
 
     protected override void OnDestroy()
     {
-        this.ViewModel.NavigationRequested -= this.NavigateTo;
+        this.ViewModel.NavigationToRequested -= this.NavigateTo;
+        this.ViewModel.NavigationCloseRequested -= this.NavigateClose;
         this.ViewModel.OnViewModelDestroy();
         this.bindingObject.Dispose();
         base.OnDestroy();
@@ -82,20 +83,20 @@ public abstract class DjXActivityBase<T> : AppCompatActivity
     private View? CreateView(View? parent, string name, Context context, IAttributeSet attrs)
         => name switch
         {
-            "EditText" => new EditText(context, attrs),
-            "TextView" => new TextView(context, attrs),
-            "Button" => new Button(context, attrs),
             "com.google.android.material.textview.MaterialTextView" => new MaterialTextView(context, attrs),
             "androidx.appcompat.widget.AppCompatEditText" => new AppCompatEditText(context, attrs),
             "androidx.appcompat.widget.AppCompatButton" => new AppCompatButton(context, attrs),
             "com.google.android.material.floatingactionbutton.FloatingActionButton" => new FloatingActionButton(context, attrs),
             "androidx.recyclerview.widget.RecyclerView" => new RecyclerView(context, attrs),
+            "EditText" => new EditText(context, attrs),
+            "TextView" => new TextView(context, attrs),
+            "Button" => new Button(context, attrs),
             _ => base.OnCreateView(parent, name, context, attrs),
         };
 
     private void NavigateTo(Type viewModelType)
     {
-        Type? viewType = this.GetViewForViewModel(viewModelType);
+        var viewType = this.GetViewForViewModel(viewModelType);
 
         if (viewType is not null)
         {
@@ -103,6 +104,8 @@ public abstract class DjXActivityBase<T> : AppCompatActivity
             this.StartActivity(intent);
         }
     }
+
+    private void NavigateClose() => this.Finish();
 
     private Type? GetViewForViewModel(Type viewModelType)
     {
