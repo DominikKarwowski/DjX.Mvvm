@@ -62,7 +62,7 @@ public abstract class DjXActivityBase<T> : AppCompatActivity
             throw new InvalidOperationException($"Application must be of type {nameof(DjXApplication)}");
         }
 
-        this.ViewModel = djXApplication.CreateViewModel<T>();
+        this.ViewModel = djXApplication.GetViewModelFactory<T>().CreateViewModel();
         this.navigationService = djXApplication.GetNavigationService() as AndroidNavigationService;
 
         this.ViewModel.NavigationToRequested += this.NavigateTo;
