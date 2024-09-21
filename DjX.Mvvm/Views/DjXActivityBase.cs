@@ -1,5 +1,6 @@
 ﻿#if ANDROID21_0_OR_GREATER
 using Android.Content;
+using Android.OS;
 using Android.Util;
 using Android.Views;
 using AndroidX.AppCompat.App;
@@ -62,7 +63,12 @@ public abstract class DjXActivityBase<T> : AppCompatActivity
             throw new InvalidOperationException($"Application must be of type {nameof(DjXApplication)}");
         }
 
-        this.ViewModel = djXApplication.GetViewModelFactory<T>().CreateViewModel();
+        var model = (this.Intent?.Extras?.GetBinder("model") as NavigationDataBinder)?.Data;
+        var modelType = (this.Intent?.Extras?.GetBinder("modelType") as NavigationDataBinder)?.Data as Type;
+
+        this.ViewModel = model is not null && modelType is not null
+            ? djXApplication.GetViewModelFactory<T>().CreateViewModel(model, modelType)
+            : djXApplication.GetViewModelFactory<T>().CreateViewModel();
         this.navigationService = djXApplication.GetNavigationService() as AndroidNavigationService;
 
         this.ViewModel.NavigationToRequested += this.NavigateTo;
@@ -94,15 +100,26 @@ public abstract class DjXActivityBase<T> : AppCompatActivity
             _ => base.OnCreateView(parent, name, context, attrs),
         };
 
-    private void NavigateTo(Type viewModelType)
+    private void NavigateTo(Type viewModelType, Type? modelType, object? model)
     {
         var viewType = this.GetViewForViewModel(viewModelType);
 
-        if (viewType is not null)
+        if (viewType is null)
         {
-            var intent = new Intent(this, viewType);
-            this.StartActivity(intent);
+            return;
         }
+
+        var intent = new Intent(this, viewType);
+
+        if (modelType is not null && model is not null)
+        {
+            var bundle = new Bundle();
+            bundle.PutBinder("model", new NavigationDataBinder(model));
+            bundle.PutBinder("modelType", new NavigationDataBinder(modelType));
+            _ = intent.PutExtras(bundle);
+        }
+
+        this.StartActivity(intent);
     }
 
     private void NavigateClose() => this.Finish();
@@ -141,5 +158,10 @@ public abstract class DjXActivityBase<T> : AppCompatActivity
 
         return assembly;
     }
+}
+
+public class NavigationDataBinder(object data) : Android.OS.Binder
+{
+    public object Data { get; } = data;
 }
 #endif

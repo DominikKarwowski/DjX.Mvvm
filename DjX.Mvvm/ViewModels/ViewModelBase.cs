@@ -8,7 +8,7 @@ namespace DjX.Mvvm.ViewModels;
 public abstract class ViewModelBase : INotifyPropertyChanged, INavigable
 {
     public event PropertyChangedEventHandler? PropertyChanged;
-    public event Action<Type>? NavigationToRequested;
+    public event Action<Type, Type?, object?>? NavigationToRequested;
     public event Action? NavigationCloseRequested;
 
     public virtual void OnViewModelDestroy() => this.DisposeAsyncCommands();
@@ -17,7 +17,12 @@ public abstract class ViewModelBase : INotifyPropertyChanged, INavigable
         => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 
     protected void NavigateTo<TViewModel>() where TViewModel : ViewModelBase
-        => NavigationToRequested?.Invoke(typeof(TViewModel));
+        => NavigationToRequested?.Invoke(typeof(TViewModel), null, null);
+
+    protected void NavigateTo<TViewModel, TModel>(TModel model)
+        where TViewModel : ViewModelBase
+        where TModel : class
+        => NavigationToRequested?.Invoke(typeof(TViewModel), typeof(TModel), model);
 
     protected void NavigateClose() => NavigationCloseRequested?.Invoke();
 
