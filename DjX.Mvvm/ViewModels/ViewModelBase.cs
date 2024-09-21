@@ -20,8 +20,7 @@ public abstract class ViewModelBase : INotifyPropertyChanged, INavigable
         => NavigationToRequested?.Invoke(typeof(TViewModel), null, null);
 
     protected void NavigateTo<TViewModel, TModel>(TModel model)
-        where TViewModel : ViewModelBase
-        where TModel : class
+        where TViewModel : ViewModelBase<TModel>
         => NavigationToRequested?.Invoke(typeof(TViewModel), typeof(TModel), model);
 
     protected void NavigateClose() => NavigationCloseRequested?.Invoke();
