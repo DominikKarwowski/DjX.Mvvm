@@ -1,6 +1,5 @@
 ﻿#if ANDROID21_0_OR_GREATER
 using Android.Content;
-using Android.OS;
 using Android.Util;
 using Android.Views;
 using AndroidX.AppCompat.App;
@@ -71,16 +70,39 @@ public abstract class DjXActivityBase<T> : AppCompatActivity
             : djXApplication.GetViewModelFactory<T>().CreateViewModel();
         this.navigationService = djXApplication.GetNavigationService() as AndroidNavigationService;
 
-        this.ViewModel.NavigationToRequested += this.NavigateTo;
-        this.ViewModel.NavigationCloseRequested += this.NavigateClose;
-
         base.OnCreate(savedInstanceState);
     }
 
+    protected override void OnStart() => base.OnStart();
+
+    protected override void OnRestart() => base.OnRestart();
+
+    protected override void OnResume()
+    {
+        if (this.navigationService is not null)
+        {
+            this.navigationService.NavigationToRequested += this.NavigateTo;
+            this.navigationService.NavigationCloseRequested += this.NavigateClose;
+        }
+
+        base.OnResume();
+    }
+
+    protected override void OnPause()
+    {
+        if (this.navigationService is not null)
+        {
+            this.navigationService.NavigationToRequested -= this.NavigateTo;
+            this.navigationService.NavigationCloseRequested -= this.NavigateClose;
+        }
+
+        base.OnPause();
+    }
+
+    protected override void OnStop() => base.OnStop();
+
     protected override void OnDestroy()
     {
-        this.ViewModel.NavigationToRequested -= this.NavigateTo;
-        this.ViewModel.NavigationCloseRequested -= this.NavigateClose;
         this.ViewModel.OnViewModelDestroy();
         this.bindingObject.Dispose();
         base.OnDestroy();
@@ -100,8 +122,23 @@ public abstract class DjXActivityBase<T> : AppCompatActivity
             _ => base.OnCreateView(parent, name, context, attrs),
         };
 
+    private void ThrowIfNavigationServiceIsNullOrSetUpIncorrectly()
+    {
+        if (this.navigationService is null)
+        {
+            throw new InvalidOperationException($"Navigation service is not set on {nameof(DjXActivityBase<T>)}");
+        }
+
+        if (string.IsNullOrWhiteSpace(this.navigationService?.ViewsNamespace))
+        {
+            throw new InvalidOperationException($"{nameof(this.navigationService.ViewsNamespace)} is not set..");
+        }
+    }
+
     private void NavigateTo(Type viewModelType, Type? modelType, object? model)
     {
+        this.ThrowIfNavigationServiceIsNullOrSetUpIncorrectly();
+
         var viewType = this.GetViewForViewModel(viewModelType);
 
         if (viewType is null)
@@ -128,36 +165,28 @@ public abstract class DjXActivityBase<T> : AppCompatActivity
     {
         var linkedViewAttr = viewModelType.GetCustomAttribute<LinkedViewAttribute>();
 
-        if (string.IsNullOrWhiteSpace(this.navigationService?.ViewsNamespace)
-            || string.IsNullOrWhiteSpace(linkedViewAttr?.ViewName))
+        if (string.IsNullOrWhiteSpace(linkedViewAttr?.ViewName))
         {
             return default;
         }
 
         var viewName = string.Join(".",
-            this.navigationService.ViewsNamespace,
+            this.navigationService!.ViewsNamespace,
             linkedViewAttr.ViewName);
 
-        var assembly = this.navigationService.AndroidExecutingAssembly ?? this.TryResolveExecutingAssembly();
+        this.navigationService.AndroidExecutingAssembly ??= this.TryResolveViewsAssembly();
+
+        var assembly = this.navigationService.AndroidExecutingAssembly;
 
         return assembly?.GetType(viewName);
     }
 
-    private Assembly? TryResolveExecutingAssembly()
-    {
-        if (this.navigationService is null)
-            return default;
-
-        var assembly = AppDomain.CurrentDomain
+    private Assembly? TryResolveViewsAssembly()
+        => AppDomain.CurrentDomain
             .GetAssemblies()
             .Where(a =>
-                a.FullName?.StartsWith(this.navigationService.ViewsAssemblyName) ?? false)
+                a.FullName?.StartsWith(this.navigationService!.ViewsAssemblyName) ?? false)
             .FirstOrDefault();
-
-        this.navigationService.AndroidExecutingAssembly = assembly;
-
-        return assembly;
-    }
 }
 
 public class NavigationDataBinder(object data) : Android.OS.Binder

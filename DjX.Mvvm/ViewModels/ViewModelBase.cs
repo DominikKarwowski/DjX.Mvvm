@@ -1,29 +1,17 @@
 ﻿using DjX.Mvvm.Commands.Abstractions;
-using DjX.Mvvm.Navigation.Abstractions;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
 namespace DjX.Mvvm.ViewModels;
 
-public abstract class ViewModelBase : INotifyPropertyChanged, INavigable
+public abstract class ViewModelBase : INotifyPropertyChanged
 {
     public event PropertyChangedEventHandler? PropertyChanged;
-    public event Action<Type, Type?, object?>? NavigationToRequested;
-    public event Action? NavigationCloseRequested;
 
     public virtual void OnViewModelDestroy() => this.DisposeAsyncCommands();
 
     protected void RaisePropertyChanged([CallerMemberName] string? propertyName = null)
         => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-
-    protected void NavigateTo<TViewModel>() where TViewModel : ViewModelBase
-        => NavigationToRequested?.Invoke(typeof(TViewModel), null, null);
-
-    protected void NavigateTo<TViewModel, TModel>(TModel model)
-        where TViewModel : ViewModelBase<TModel>
-        => NavigationToRequested?.Invoke(typeof(TViewModel), typeof(TModel), model);
-
-    protected void NavigateClose() => NavigationCloseRequested?.Invoke();
 
     private void DisposeAsyncCommands()
     {
