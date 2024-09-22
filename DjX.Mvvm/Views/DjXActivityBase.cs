@@ -20,12 +20,12 @@ namespace DjX.Mvvm.Views;
 public abstract class DjXActivityBase<T> : AppCompatActivity
     where T : ViewModelBase
 {
-    private AndroidNavigationService? navigationService;
     private readonly AndroidBindingObject bindingObject = new();
+
+    private AndroidNavigationService NavigationService => ((DjXApplication)this.Application!).NavigationService;
 
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
     // ViewModel is set in OnCreate
-
     public T ViewModel { get; private set; }
 #pragma warning restore CS8618
 
@@ -68,7 +68,6 @@ public abstract class DjXActivityBase<T> : AppCompatActivity
         this.ViewModel = model is not null && modelType is not null
             ? djXApplication.GetViewModelFactory<T>().CreateViewModel(model, modelType)
             : djXApplication.GetViewModelFactory<T>().CreateViewModel();
-        this.navigationService = djXApplication.GetNavigationService() as AndroidNavigationService;
 
         base.OnCreate(savedInstanceState);
     }
@@ -79,22 +78,16 @@ public abstract class DjXActivityBase<T> : AppCompatActivity
 
     protected override void OnResume()
     {
-        if (this.navigationService is not null)
-        {
-            this.navigationService.NavigationToRequested += this.NavigateTo;
-            this.navigationService.NavigationCloseRequested += this.NavigateClose;
-        }
+        this.NavigationService.NavigationToRequested += this.NavigateTo;
+        this.NavigationService.NavigationCloseRequested += this.NavigateClose;
 
         base.OnResume();
     }
 
     protected override void OnPause()
     {
-        if (this.navigationService is not null)
-        {
-            this.navigationService.NavigationToRequested -= this.NavigateTo;
-            this.navigationService.NavigationCloseRequested -= this.NavigateClose;
-        }
+        this.NavigationService.NavigationToRequested -= this.NavigateTo;
+        this.NavigationService.NavigationCloseRequested -= this.NavigateClose;
 
         base.OnPause();
     }
@@ -122,23 +115,8 @@ public abstract class DjXActivityBase<T> : AppCompatActivity
             _ => base.OnCreateView(parent, name, context, attrs),
         };
 
-    private void ThrowIfNavigationServiceIsNullOrSetUpIncorrectly()
-    {
-        if (this.navigationService is null)
-        {
-            throw new InvalidOperationException($"Navigation service is not set on {nameof(DjXActivityBase<T>)}");
-        }
-
-        if (string.IsNullOrWhiteSpace(this.navigationService?.ViewsNamespace))
-        {
-            throw new InvalidOperationException($"{nameof(this.navigationService.ViewsNamespace)} is not set..");
-        }
-    }
-
     private void NavigateTo(Type viewModelType, Type? modelType, object? model)
     {
-        this.ThrowIfNavigationServiceIsNullOrSetUpIncorrectly();
-
         var viewType = this.GetViewForViewModel(viewModelType);
 
         if (viewType is null)
@@ -171,12 +149,12 @@ public abstract class DjXActivityBase<T> : AppCompatActivity
         }
 
         var viewName = string.Join(".",
-            this.navigationService!.ViewsNamespace,
+            this.NavigationService.ViewsNamespace,
             linkedViewAttr.ViewName);
 
-        this.navigationService.AndroidExecutingAssembly ??= this.TryResolveViewsAssembly();
+        this.NavigationService.AndroidExecutingAssembly ??= this.TryResolveViewsAssembly();
 
-        var assembly = this.navigationService.AndroidExecutingAssembly;
+        var assembly = this.NavigationService.AndroidExecutingAssembly;
 
         return assembly?.GetType(viewName);
     }
@@ -185,7 +163,7 @@ public abstract class DjXActivityBase<T> : AppCompatActivity
         => AppDomain.CurrentDomain
             .GetAssemblies()
             .Where(a =>
-                a.FullName?.StartsWith(this.navigationService!.ViewsAssemblyName) ?? false)
+                a.FullName?.StartsWith(this.NavigationService.ViewsAssemblyName) ?? false)
             .FirstOrDefault();
 }
 

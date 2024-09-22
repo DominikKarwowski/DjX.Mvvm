@@ -4,14 +4,13 @@ using DjX.Mvvm.ViewModels;
 using System.Reflection;
 
 namespace DjX.Mvvm.Navigation;
-public class AndroidNavigationService(string viewsAssemblyName, string viewsNamespace)
-    : INavigationService
+public class AndroidNavigationService(string viewsAssemblyName, string viewsNamespace) : INavigationService
 {
     internal Assembly? AndroidExecutingAssembly { get; set; } = null;
 
-    public string ViewsAssemblyName => viewsAssemblyName;
+    public string ViewsAssemblyName { get; } = viewsAssemblyName ?? throw new ArgumentNullException(viewsAssemblyName);
 
-    public string ViewsNamespace => viewsNamespace;
+    public string ViewsNamespace { get; } = viewsNamespace ?? throw new ArgumentNullException(viewsNamespace);
 
     public event Action<Type, Type?, object?>? NavigationToRequested;
 
