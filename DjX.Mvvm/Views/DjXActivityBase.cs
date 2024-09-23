@@ -17,8 +17,8 @@ using System.Reflection;
 
 namespace DjX.Mvvm.Views;
 
-public abstract class DjXActivityBase<T> : AppCompatActivity
-    where T : ViewModelBase
+public abstract class DjXActivityBase<TViewModel> : AppCompatActivity
+    where TViewModel : ViewModelBase
 {
     private readonly AndroidBindingObject bindingObject = new();
 
@@ -26,7 +26,7 @@ public abstract class DjXActivityBase<T> : AppCompatActivity
 
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
     // ViewModel is set in OnCreate
-    public T ViewModel { get; private set; }
+    public TViewModel ViewModel { get; private set; }
 #pragma warning restore CS8618
 
     public override View? OnCreateView(View? parent, string name, Context context, IAttributeSet attrs)
@@ -66,8 +66,8 @@ public abstract class DjXActivityBase<T> : AppCompatActivity
         var modelType = (this.Intent?.Extras?.GetBinder("modelType") as NavigationDataBinder)?.Data as Type;
 
         this.ViewModel = model is not null && modelType is not null
-            ? djXApplication.GetViewModelFactory<T>().CreateViewModel(model, modelType)
-            : djXApplication.GetViewModelFactory<T>().CreateViewModel();
+            ? djXApplication.GetViewModelFactory<TViewModel>().CreateViewModel(model, modelType)
+            : djXApplication.GetViewModelFactory<TViewModel>().CreateViewModel();
 
         base.OnCreate(savedInstanceState);
     }

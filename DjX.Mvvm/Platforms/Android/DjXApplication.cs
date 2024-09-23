@@ -5,7 +5,8 @@ using DjX.Mvvm.ViewModels;
 using DjX.Mvvm.ViewModels.Factories;
 
 namespace DjX.Mvvm.Platforms.Android;
-public abstract class DjXApplication(IntPtr handle, JniHandleOwnership transfer) : Application(handle, transfer)
+public abstract class DjXApplication(IntPtr handle, JniHandleOwnership transfer)
+    : Application(handle, transfer)
 {
     // TODO: this design still does not imply that navigation service should be registered as a singleton and use this same instance for viewmodels!!!
     // encapsulate it in an extension method for registering?
