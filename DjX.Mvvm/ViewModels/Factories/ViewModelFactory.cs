@@ -6,7 +6,6 @@ namespace DjX.Mvvm.ViewModels.Factories;
 // get ctors with reflection? select which one? when selected, provide the dependencies from IoC
 // with GetRequiredService<>()
 
-
 // TODO: resolve viewmodel dependencies with a dedicated resolver in the composition root:
 // * resolver will inspect available viewmodel ctors and look for available registered dependencies
 // * viewmodelfactory will take resolved dependencies as an array of objects to be passed to Activator.Createinstance
@@ -56,16 +55,16 @@ public class ViewModelFactory<TViewModel>(IServiceProvider serviceProvider)
 
             if (ctorParamsResolved)
             {
-                return ctorArgs.ToArray();
+                return [.. ctorArgs];
             }
         }
 
-        // TODO: properly choose more specific expection
+        // TODO: properly choose more specific exception
         throw new Exception("Could not resolve constructor dependencies");
     }
 
     //public TViewModel CreateViewModel<TModel>(TModel model)
-    public TViewModel CreateViewModel(object model, Type modelType)
+    public TViewModel CreateViewModel(object? model, Type modelType)
     {
         //var modelType = typeof(TModel);
 
@@ -90,7 +89,7 @@ public class ViewModelFactory<TViewModel>(IServiceProvider serviceProvider)
             ?? throw new Exception("Could not create a view model");
     }
 
-    private object[] ResolveConstructorArgs(IEnumerable<ConstructorInfo> viewModelCtors, object model, Type modelType)
+    private object[] ResolveConstructorArgs(IEnumerable<ConstructorInfo> viewModelCtors, object? model, Type modelType)
     {
         foreach (var ctor in viewModelCtors)
         {

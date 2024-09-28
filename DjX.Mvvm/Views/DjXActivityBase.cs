@@ -65,7 +65,7 @@ public abstract class DjXActivityBase<TViewModel> : AppCompatActivity
         var model = (this.Intent?.Extras?.GetBinder("model") as NavigationDataBinder)?.Data;
         var modelType = (this.Intent?.Extras?.GetBinder("modelType") as NavigationDataBinder)?.Data as Type;
 
-        this.ViewModel = model is not null && modelType is not null
+        this.ViewModel = modelType is not null
             ? djXApplication.GetViewModelFactory<TViewModel>().CreateViewModel(model, modelType)
             : djXApplication.GetViewModelFactory<TViewModel>().CreateViewModel();
 
@@ -126,7 +126,7 @@ public abstract class DjXActivityBase<TViewModel> : AppCompatActivity
 
         var intent = new Intent(this, viewType);
 
-        if (modelType is not null && model is not null)
+        if (modelType is not null)
         {
             var bundle = new Bundle();
             bundle.PutBinder("model", new NavigationDataBinder(model));
@@ -167,8 +167,8 @@ public abstract class DjXActivityBase<TViewModel> : AppCompatActivity
             .FirstOrDefault();
 }
 
-public class NavigationDataBinder(object data) : Android.OS.Binder
+public class NavigationDataBinder(object? data) : Android.OS.Binder
 {
-    public object Data { get; } = data;
+    public object? Data { get; } = data;
 }
 #endif
