@@ -10,10 +10,8 @@ using DjX.Mvvm.Navigation;
 using DjX.Mvvm.Platforms.Android;
 using DjX.Mvvm.Resources;
 using DjX.Mvvm.ViewModels;
-using DjX.Mvvm.ViewModels.Attributes;
 using Google.Android.Material.FloatingActionButton;
 using Google.Android.Material.TextView;
-using System.Reflection;
 
 namespace DjX.Mvvm.Views;
 
@@ -78,16 +76,14 @@ public abstract class DjXActivityBase<TViewModel> : AppCompatActivity
 
     protected override void OnResume()
     {
-        this.NavigationService.NavigationToRequested += this.NavigateTo;
-        this.NavigationService.NavigationCloseRequested += this.NavigateClose;
+        this.SubscribeToNavigationEvents();
 
         base.OnResume();
     }
 
     protected override void OnPause()
     {
-        this.NavigationService.NavigationToRequested -= this.NavigateTo;
-        this.NavigationService.NavigationCloseRequested -= this.NavigateClose;
+        this.UnsubscribeFromNavigationEvents();
 
         base.OnPause();
     }
@@ -115,60 +111,27 @@ public abstract class DjXActivityBase<TViewModel> : AppCompatActivity
             _ => base.OnCreateView(parent, name, context, attrs),
         };
 
-    private void NavigateTo(Type viewModelType, Type? modelType, object? model)
+    private void SubscribeToNavigationEvents()
     {
-        var viewType = this.GetViewForViewModel(viewModelType);
-
-        if (viewType is null)
-        {
-            return;
-        }
-
-        var intent = new Intent(this, viewType);
-
-        if (modelType is not null)
-        {
-            var bundle = new Bundle();
-            bundle.PutBinder("model", new NavigationDataBinder(model));
-            bundle.PutBinder("modelType", new NavigationDataBinder(modelType));
-            _ = intent.PutExtras(bundle);
-        }
-
-        this.StartActivity(intent);
+        this.NavigationService.NavigationToRequested += this.NavigateTo;
+        this.NavigationService.NavigationWithModelToRequested += this.NavigateWithModelTo;
+        this.NavigationService.NavigationCloseRequested += this.NavigateClose;
     }
 
-    private void NavigateClose() => this.Finish();
-
-    private Type? GetViewForViewModel(Type viewModelType)
+    private void UnsubscribeFromNavigationEvents()
     {
-        var linkedViewAttr = viewModelType.GetCustomAttribute<LinkedViewAttribute>();
-
-        if (string.IsNullOrWhiteSpace(linkedViewAttr?.ViewName))
-        {
-            return default;
-        }
-
-        var viewName = string.Join(".",
-            this.NavigationService.ViewsNamespace,
-            linkedViewAttr.ViewName);
-
-        this.NavigationService.AndroidExecutingAssembly ??= this.TryResolveViewsAssembly();
-
-        var assembly = this.NavigationService.AndroidExecutingAssembly;
-
-        return assembly?.GetType(viewName);
+        this.NavigationService.NavigationToRequested -= this.NavigateTo;
+        this.NavigationService.NavigationWithModelToRequested -= this.NavigateWithModelTo;
+        this.NavigationService.NavigationCloseRequested -= this.NavigateClose;
     }
 
-    private Assembly? TryResolveViewsAssembly()
-        => AppDomain.CurrentDomain
-            .GetAssemblies()
-            .Where(a =>
-                a.FullName?.StartsWith(this.NavigationService.ViewsAssemblyName) ?? false)
-            .FirstOrDefault();
-}
+    private void NavigateTo(Type viewModelType)
+        => AndroidNavigationHandlers.NavigateTo(this, this.NavigationService, viewModelType);
 
-public class NavigationDataBinder(object? data) : Android.OS.Binder
-{
-    public object? Data { get; } = data;
+    private void NavigateWithModelTo(Type viewModelType, Type modelType, object? model)
+        => AndroidNavigationHandlers.NavigateWithModelTo(this, this.NavigationService, viewModelType, modelType, model);
+
+    private void NavigateClose()
+        => AndroidNavigationHandlers.NavigateClose(this);
 }
 #endif

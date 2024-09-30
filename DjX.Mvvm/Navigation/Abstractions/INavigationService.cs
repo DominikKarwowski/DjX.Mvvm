@@ -1,6 +1,7 @@
 ﻿using DjX.Mvvm.ViewModels;
 
 namespace DjX.Mvvm.Navigation.Abstractions;
+
 public interface INavigationService
 {
     string ViewsNamespace { get; }
@@ -8,8 +9,13 @@ public interface INavigationService
     void NavigateTo<TViewModel>()
         where TViewModel : ViewModelBase;
 
-    void NavigateTo<TViewModel, TModel>(TModel model)
+    void NavigateWithModelTo<TViewModel, TModel>(TModel model)
         where TViewModel : ViewModelBase<TModel>;
 
+    //void NavigateForResultTo<TViewModel, TModel>(TModel model)
+    //    where TViewModel : ViewModelBase<TModel>;
+
     void CloseCurrent();
+
+    //void CloseCurrentWithResult();
 }
