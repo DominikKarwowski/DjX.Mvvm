@@ -10,6 +10,11 @@ public abstract class ViewModelBase : INotifyPropertyChanged
 
     public virtual void OnViewModelDestroy() => this.DisposeAsyncCommands();
 
+    public virtual void OnResultFromView(Navigation.ResultStatus resultStatus, object resultData)
+    {
+        // do nothing
+    }
+
     protected void RaisePropertyChanged([CallerMemberName] string? propertyName = null)
         => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 

@@ -1,5 +1,7 @@
 ﻿#if ANDROID21_0_OR_GREATER
 using Android.Content;
+using Android.Runtime;
+using Android.Security.Identity;
 using Android.Util;
 using Android.Views;
 using AndroidX.AppCompat.App;
@@ -97,6 +99,25 @@ public abstract class DjXActivityBase<TViewModel> : AppCompatActivity
         base.OnDestroy();
     }
 
+    protected override void OnActivityResult(int requestCode, [GeneratedEnum] Result resultCode, Intent? data)
+    {
+        var resultData = (data?.Extras?.GetBinder(AndroidNavigationHandlers.ResultData) as NavigationDataBinder)?.Data;
+
+        if (resultData is null)
+        {
+            return;
+        }
+
+        var resultStatus = resultCode switch
+        {
+            Result.Ok => ResultStatus.Ok,
+            (Result)2 => ResultStatus.Error,
+            _ => ResultStatus.Undefined,
+        };
+
+        this.ViewModel.OnResultFromView(resultStatus, resultData);
+    }
+
     private View? CreateView(View? parent, string name, Context context, IAttributeSet attrs)
         => name switch
         {
@@ -115,14 +136,18 @@ public abstract class DjXActivityBase<TViewModel> : AppCompatActivity
     {
         this.NavigationService.NavigationToRequested += this.NavigateTo;
         this.NavigationService.NavigationWithModelToRequested += this.NavigateWithModelTo;
+        this.NavigationService.NavigationWithModelForResultToRequested += this.NavigateWithModelForResultTo;
         this.NavigationService.NavigationCloseRequested += this.NavigateClose;
+        this.NavigationService.NavigationCloseWithResultRequested += this.NavigateCloseWithResult;
     }
 
     private void UnsubscribeFromNavigationEvents()
     {
         this.NavigationService.NavigationToRequested -= this.NavigateTo;
         this.NavigationService.NavigationWithModelToRequested -= this.NavigateWithModelTo;
+        this.NavigationService.NavigationWithModelForResultToRequested -= this.NavigateWithModelForResultTo;
         this.NavigationService.NavigationCloseRequested -= this.NavigateClose;
+        this.NavigationService.NavigationCloseWithResultRequested -= this.NavigateCloseWithResult;
     }
 
     private void NavigateTo(Type viewModelType)
@@ -131,7 +156,13 @@ public abstract class DjXActivityBase<TViewModel> : AppCompatActivity
     private void NavigateWithModelTo(Type viewModelType, Type modelType, object? model)
         => AndroidNavigationHandlers.NavigateWithModelTo(this, this.NavigationService, viewModelType, modelType, model);
 
+    private void NavigateWithModelForResultTo(Type viewModelType, Type modelType, object? model)
+        => AndroidNavigationHandlers.NavigateWithModelForResultTo(this, this.NavigationService, viewModelType, modelType, model);
+
     private void NavigateClose()
         => AndroidNavigationHandlers.NavigateClose(this);
+
+    private void NavigateCloseWithResult(ResultStatus resultStatus, object resultData)
+        => AndroidNavigationHandlers.NavigateCloseWithResult(this, resultStatus, resultData);
 }
 #endif

@@ -12,10 +12,10 @@ public interface INavigationService
     void NavigateWithModelTo<TViewModel, TModel>(TModel model)
         where TViewModel : ViewModelBase<TModel>;
 
-    //void NavigateForResultTo<TViewModel, TModel>(TModel model)
-    //    where TViewModel : ViewModelBase<TModel>;
+    void NavigateWithModelForResultTo<TViewModel, TModel>(TModel model)
+        where TViewModel : ViewModelBase<TModel>;
 
     void CloseCurrent();
 
-    //void CloseCurrentWithResult();
+    void CloseCurrentWithResult(ResultStatus resultStatus, object resultData); // TODO: add result status (Ok, Error)
 }
