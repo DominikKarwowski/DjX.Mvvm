@@ -1,0 +1,39 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0-android</TargetFramework>
+		<RootNamespace>DjX.Mvvm.Platforms.Android</RootNamespace>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+		<SupportedOSPlatformVersion>21</SupportedOSPlatformVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <AndroidResource Remove="Resources\values\attrs.xml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Xamarin.AndroidX.AppCompat" Version="1.7.0.2" />
+    <PackageReference Include="Xamarin.Google.Android.Material" Version="1.11.0.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\DjX.Mvvm.Core\DjX.Mvvm.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Resources\AndroidStrings.Designer.cs">
+      <DependentUpon>AndroidStrings.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="Resources\AndroidStrings.resx">
+      <LastGenOutput>AndroidStrings.Designer.cs</LastGenOutput>
+      <Generator>ResXFileCodeGenerator</Generator>
+    </EmbeddedResource>
+  </ItemGroup>
+
+</Project>

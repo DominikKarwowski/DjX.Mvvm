@@ -6,7 +6,7 @@ namespace DjX.Mvvm.Core.ViewModels.Factories;
 // * resolver will inspect available viewmodel ctors and look for available registered dependencies
 // * viewmodelfactory will take resolved dependencies as an array of objects to be passed to Activator.Createinstance
 // * create a dedicated extension method to register viewmodelfactory and apply params resolver
-// Once this is done, remove Microsoft.Extensions.DependencyInjection package dependency from this project
+// Once this is done, remove IServiceProvider dependency from the factory
 
 // TODO: refactor the below hastily coded poc into a better desing
 public class ViewModelFactory<TViewModel>(IServiceProvider serviceProvider)
