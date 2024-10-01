@@ -9,11 +9,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <AndroidResource Remove="Resources\values\attrs.xml" />
+		<AndroidResource Include="Resources\**\*.xml" SubType="Designer" Generator="MSBuild:UpdateAndroidResources" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Xamarin.AndroidX.AppCompat" Version="1.7.0.2" />
+		<PackageReference Include="Xamarin.AndroidX.AppCompat" Version="1.7.0.2" />
     <PackageReference Include="Xamarin.Google.Android.Material" Version="1.11.0.2" />
   </ItemGroup>
 
