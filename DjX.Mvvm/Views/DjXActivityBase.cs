@@ -1,5 +1,7 @@
 ﻿#if ANDROID21_0_OR_GREATER
 using Android.Content;
+using Android.Runtime;
+using Android.Security.Identity;
 using Android.Util;
 using Android.Views;
 using AndroidX.AppCompat.App;
@@ -10,23 +12,21 @@ using DjX.Mvvm.Navigation;
 using DjX.Mvvm.Platforms.Android;
 using DjX.Mvvm.Resources;
 using DjX.Mvvm.ViewModels;
-using DjX.Mvvm.ViewModels.Attributes;
 using Google.Android.Material.FloatingActionButton;
 using Google.Android.Material.TextView;
-using System.Reflection;
 
 namespace DjX.Mvvm.Views;
 
-public abstract class DjXActivityBase<T> : AppCompatActivity
-    where T : ViewModelBase
+public abstract class DjXActivityBase<TViewModel> : AppCompatActivity
+    where TViewModel : ViewModelBase
 {
-    private AndroidNavigationService? navigationService;
     private readonly AndroidBindingObject bindingObject = new();
+
+    private AndroidNavigationService NavigationService => ((DjXApplication)this.Application!).NavigationService;
 
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
     // ViewModel is set in OnCreate
-
-    public T ViewModel { get; private set; }
+    public TViewModel ViewModel { get; private set; }
 #pragma warning restore CS8618
 
     public override View? OnCreateView(View? parent, string name, Context context, IAttributeSet attrs)
@@ -62,22 +62,60 @@ public abstract class DjXActivityBase<T> : AppCompatActivity
             throw new InvalidOperationException($"Application must be of type {nameof(DjXApplication)}");
         }
 
-        this.ViewModel = djXApplication.CreateViewModel<T>();
-        this.navigationService = djXApplication.GetNavigationService() as AndroidNavigationService;
+        var model = (this.Intent?.Extras?.GetBinder("model") as NavigationDataBinder)?.Data;
+        var modelType = (this.Intent?.Extras?.GetBinder("modelType") as NavigationDataBinder)?.Data as Type;
 
-        this.ViewModel.NavigationToRequested += this.NavigateTo;
-        this.ViewModel.NavigationCloseRequested += this.NavigateClose;
+        this.ViewModel = modelType is not null
+            ? djXApplication.GetViewModelFactory<TViewModel>().CreateViewModel(model, modelType)
+            : djXApplication.GetViewModelFactory<TViewModel>().CreateViewModel();
 
         base.OnCreate(savedInstanceState);
     }
 
+    protected override void OnStart() => base.OnStart();
+
+    protected override void OnRestart() => base.OnRestart();
+
+    protected override void OnResume()
+    {
+        this.SubscribeToNavigationEvents();
+
+        base.OnResume();
+    }
+
+    protected override void OnPause()
+    {
+        this.UnsubscribeFromNavigationEvents();
+
+        base.OnPause();
+    }
+
+    protected override void OnStop() => base.OnStop();
+
     protected override void OnDestroy()
     {
-        this.ViewModel.NavigationToRequested -= this.NavigateTo;
-        this.ViewModel.NavigationCloseRequested -= this.NavigateClose;
         this.ViewModel.OnViewModelDestroy();
         this.bindingObject.Dispose();
         base.OnDestroy();
+    }
+
+    protected override void OnActivityResult(int requestCode, [GeneratedEnum] Result resultCode, Intent? data)
+    {
+        var resultData = (data?.Extras?.GetBinder(AndroidNavigationHandlers.ResultData) as NavigationDataBinder)?.Data;
+
+        if (resultData is null)
+        {
+            return;
+        }
+
+        var resultStatus = resultCode switch
+        {
+            Result.Ok => ResultStatus.Ok,
+            (Result)2 => ResultStatus.Error,
+            _ => ResultStatus.Undefined,
+        };
+
+        this.ViewModel.OnResultFromView(resultStatus, resultData);
     }
 
     private View? CreateView(View? parent, string name, Context context, IAttributeSet attrs)
@@ -94,52 +132,37 @@ public abstract class DjXActivityBase<T> : AppCompatActivity
             _ => base.OnCreateView(parent, name, context, attrs),
         };
 
+    private void SubscribeToNavigationEvents()
+    {
+        this.NavigationService.NavigationToRequested += this.NavigateTo;
+        this.NavigationService.NavigationWithModelToRequested += this.NavigateWithModelTo;
+        this.NavigationService.NavigationWithModelForResultToRequested += this.NavigateWithModelForResultTo;
+        this.NavigationService.NavigationCloseRequested += this.NavigateClose;
+        this.NavigationService.NavigationCloseWithResultRequested += this.NavigateCloseWithResult;
+    }
+
+    private void UnsubscribeFromNavigationEvents()
+    {
+        this.NavigationService.NavigationToRequested -= this.NavigateTo;
+        this.NavigationService.NavigationWithModelToRequested -= this.NavigateWithModelTo;
+        this.NavigationService.NavigationWithModelForResultToRequested -= this.NavigateWithModelForResultTo;
+        this.NavigationService.NavigationCloseRequested -= this.NavigateClose;
+        this.NavigationService.NavigationCloseWithResultRequested -= this.NavigateCloseWithResult;
+    }
+
     private void NavigateTo(Type viewModelType)
-    {
-        var viewType = this.GetViewForViewModel(viewModelType);
+        => AndroidNavigationHandlers.NavigateTo(this, this.NavigationService, viewModelType);
 
-        if (viewType is not null)
-        {
-            var intent = new Intent(this, viewType);
-            this.StartActivity(intent);
-        }
-    }
+    private void NavigateWithModelTo(Type viewModelType, Type modelType, object? model)
+        => AndroidNavigationHandlers.NavigateWithModelTo(this, this.NavigationService, viewModelType, modelType, model);
 
-    private void NavigateClose() => this.Finish();
+    private void NavigateWithModelForResultTo(Type viewModelType, Type modelType, object? model)
+        => AndroidNavigationHandlers.NavigateWithModelForResultTo(this, this.NavigationService, viewModelType, modelType, model);
 
-    private Type? GetViewForViewModel(Type viewModelType)
-    {
-        var linkedViewAttr = viewModelType.GetCustomAttribute<LinkedViewAttribute>();
+    private void NavigateClose()
+        => AndroidNavigationHandlers.NavigateClose(this);
 
-        if (string.IsNullOrWhiteSpace(this.navigationService?.ViewsNamespace)
-            || string.IsNullOrWhiteSpace(linkedViewAttr?.ViewName))
-        {
-            return default;
-        }
-
-        var viewName = string.Join(".",
-            this.navigationService.ViewsNamespace,
-            linkedViewAttr.ViewName);
-
-        var assembly = this.navigationService.AndroidExecutingAssembly ?? this.TryResolveExecutingAssembly();
-
-        return assembly?.GetType(viewName);
-    }
-
-    private Assembly? TryResolveExecutingAssembly()
-    {
-        if (this.navigationService is null)
-            return default;
-
-        var assembly = AppDomain.CurrentDomain
-            .GetAssemblies()
-            .Where(a =>
-                a.FullName?.StartsWith(this.navigationService.ViewsAssemblyName) ?? false)
-            .FirstOrDefault();
-
-        this.navigationService.AndroidExecutingAssembly = assembly;
-
-        return assembly;
-    }
+    private void NavigateCloseWithResult(ResultStatus resultStatus, object resultData)
+        => AndroidNavigationHandlers.NavigateCloseWithResult(this, resultStatus, resultData);
 }
 #endif

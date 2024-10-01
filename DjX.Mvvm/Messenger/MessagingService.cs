@@ -4,28 +4,25 @@ using System.Collections.Concurrent;
 
 namespace DjX.Mvvm.Messenger;
 
-public class MessagingService : IMessagingService
+public class MessagingService(MainThreadScheduler mainThreadRunner) : IMessagingService
 {
-    private readonly object _locker = new();
-    private readonly ConcurrentDictionary<Type, List<object>> _subscriptions = new();
-    private readonly MainThreadScheduler _mainThreadRunner;
-
-    public MessagingService(MainThreadScheduler mainThreadRunner)
-    {
-        _mainThreadRunner = mainThreadRunner;
-    }
+    private readonly object locker = new();
+    private readonly ConcurrentDictionary<Type, List<object>> subscriptions = new();
 
     public void Publish<TMessage>(TMessage message)
     {
-        var actions = _subscriptions.GetOrAdd(
-            typeof(TMessage), new List<object>());
+        var actions = this.subscriptions.GetOrAdd(
+            typeof(TMessage), []);
 
         try
         {
             var actionsCopy = actions.ToList();
             actionsCopy.ForEach(action =>
             {
-                if (action is Action<TMessage> a) a(message);
+                if (action is Action<TMessage> a)
+                {
+                    a(message);
+                }
             });
             // TODO: check the possibility for parallel execution
             //Parallel.ForEach(actions, action => action(message));
@@ -39,10 +36,10 @@ public class MessagingService : IMessagingService
 
     public void Subscribe<TMessage>(Action<TMessage> callback)
     {
-        var actions = _subscriptions.GetOrAdd(
-            typeof(TMessage), new List<object>());
+        var actions = this.subscriptions.GetOrAdd(
+            typeof(TMessage), []);
 
-        lock (_locker)
+        lock (this.locker)
         {
             actions.Add(callback);
         }
@@ -50,12 +47,12 @@ public class MessagingService : IMessagingService
 
     public void SubscribeOnMainThread<TMessage>(Action<TMessage> callback)
     {
-        var callbackEnqueuedOnMainThread = _mainThreadRunner.ScheduleOnMainThread(callback);
+        var callbackEnqueuedOnMainThread = mainThreadRunner.ScheduleOnMainThread(callback);
 
-        var actions = _subscriptions.GetOrAdd(
-            typeof(TMessage), new List<object>());
+        var actions = this.subscriptions.GetOrAdd(
+            typeof(TMessage), []);
 
-        lock (_locker)
+        lock (this.locker)
         {
             actions.Add(callbackEnqueuedOnMainThread);
         }
@@ -63,12 +60,12 @@ public class MessagingService : IMessagingService
 
     public void Unsubscribe<TMessage>(Action<TMessage> callback)
     {
-        var actions = _subscriptions.GetOrAdd(
-            typeof(TMessage), new List<object>());
+        var actions = this.subscriptions.GetOrAdd(
+            typeof(TMessage), []);
 
-        lock (_locker)
+        lock (this.locker)
         {
-            actions.Remove(callback);
+            _ = actions.Remove(callback);
         }
     }
 }

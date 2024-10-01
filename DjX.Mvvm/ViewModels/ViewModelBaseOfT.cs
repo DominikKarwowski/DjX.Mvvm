@@ -4,7 +4,7 @@ namespace DjX.Mvvm.ViewModels;
 
 public abstract class ViewModelBase<TModel>(TModel model) : ViewModelBase
 {
-    public TModel Model { get; } = model;
+    public TModel? Model { get; } = model;
 
     protected TValue GetValue<TValue>([CallerMemberName] string? propertyName = null)
     {
