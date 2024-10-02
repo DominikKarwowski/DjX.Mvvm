@@ -1,6 +1,6 @@
-﻿using DjX.Mvvm.Commands;
+﻿using DjX.Mvvm.Core.Commands;
 
-namespace BackupTool.ViewModel.Tests.Commands;
+namespace DjX.Mvvm.Core.Tests.Commands;
 
 [TestFixture]
 public class DelegateCommandTests
