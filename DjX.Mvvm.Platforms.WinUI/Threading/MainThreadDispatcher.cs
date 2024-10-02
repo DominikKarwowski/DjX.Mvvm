@@ -1,7 +1,7 @@
 ﻿using DjX.Mvvm.Core.Threading.Abstractions;
 using Microsoft.UI.Dispatching;
 
-namespace DjX.Mvvm.Platform.WinUI.Threading;
+namespace DjX.Mvvm.Platforms.WinUI.Threading;
 
 public class MainThreadDispatcher : IMainThreadDispatcher
 {
