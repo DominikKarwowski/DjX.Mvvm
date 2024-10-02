@@ -1,6 +1,6 @@
-﻿using DjX.Mvvm.Commands.Abstractions;
+﻿using DjX.Mvvm.Core.Commands.Abstractions;
 
-namespace DjX.Mvvm.Commands;
+namespace DjX.Mvvm.Core.Commands;
 
 
 //https://learn.microsoft.com/en-us/archive/msdn-magazine/2014/april/async-programming-patterns-for-asynchronous-mvvm-applications-commands

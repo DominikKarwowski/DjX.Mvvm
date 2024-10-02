@@ -1,8 +1,9 @@
-﻿using DjX.Mvvm.Commands.Abstractions;
+﻿using DjX.Mvvm.Core.Commands.Abstractions;
+using DjX.Mvvm.Core.Navigation;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
-namespace DjX.Mvvm.ViewModels;
+namespace DjX.Mvvm.Core.ViewModels;
 
 public abstract class ViewModelBase : INotifyPropertyChanged
 {
@@ -10,7 +11,7 @@ public abstract class ViewModelBase : INotifyPropertyChanged
 
     public virtual void OnViewModelDestroy() => this.DisposeAsyncCommands();
 
-    public virtual void OnResultFromView(Navigation.ResultStatus resultStatus, object resultData)
+    public virtual void OnResultFromView(ResultStatus resultStatus, object resultData)
     {
         // do nothing
     }

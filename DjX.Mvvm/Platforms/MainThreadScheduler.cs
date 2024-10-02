@@ -7,7 +7,7 @@ namespace DjX.Mvvm.Platforms;
 public class MainThreadScheduler
 {
 #if WINDOWS10_0_17763_0_OR_GREATER
-    private readonly DispatcherQueue _dispatcherQueue = DispatcherQueue.GetForCurrentThread();
+    private readonly DispatcherQueue dispatcherQueue = DispatcherQueue.GetForCurrentThread();
 #endif
 
     public Action<T> ScheduleOnMainThread<T>(Action<T> callback)
@@ -15,13 +15,13 @@ public class MainThreadScheduler
 #if WINDOWS10_0_17763_0_OR_GREATER
         return (param) =>
         {
-            if (_dispatcherQueue.HasThreadAccess)
+            if (this.dispatcherQueue.HasThreadAccess)
             {
                 callback(param);
             }
             else
             {
-                _dispatcherQueue.TryEnqueue(() => callback(param));
+                this.dispatcherQueue.TryEnqueue(() => callback(param));
             }
         };
 #else
@@ -32,13 +32,13 @@ public class MainThreadScheduler
     public void RunOnMainThread(Action callback)
     {
 #if WINDOWS10_0_17763_0_OR_GREATER
-        if (_dispatcherQueue.HasThreadAccess)
+        if (this.dispatcherQueue.HasThreadAccess)
         {
             callback();
         }
         else
         {
-            _dispatcherQueue.TryEnqueue(() => callback());
+            this.dispatcherQueue.TryEnqueue(() => callback());
         }
 #else
         callback();

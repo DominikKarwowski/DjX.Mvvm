@@ -1,7 +1,7 @@
-﻿using DjX.Mvvm.Messenger;
-using DjX.Mvvm.Platforms;
+﻿using DjX.Mvvm.Core.Messenger;
+using DjX.Mvvm.Core.Tests.TestDoubles;
 
-namespace BackupTool.ViewModel.Tests.Messenger;
+namespace DjX.Mvvm.Core.Tests.Messenger;
 
 [TestFixture]
 public class MessagingServiceTests
@@ -17,7 +17,7 @@ public class MessagingServiceTests
         Action<string> callback2 = msg => callback2executed = true;
         Action<int> callback3 = msg => callback3executed = true;
 
-        var sut = new MessagingService(new MainThreadScheduler());
+        var sut = new MessagingService(new MainThreadDispatcherFake());
 
         sut.Subscribe(callback1);
         sut.Subscribe(callback2);
@@ -44,7 +44,7 @@ public class MessagingServiceTests
         Action<string> callback2 = msg => callback2executed = true;
         Action<int> callback3 = msg => callback3executed = true;
 
-        var sut = new MessagingService(new MainThreadScheduler());
+        var sut = new MessagingService(new MainThreadDispatcherFake());
 
         sut.Subscribe(callback1);
         sut.Subscribe(callback2);
@@ -70,7 +70,7 @@ public class MessagingServiceTests
 
         Action<string> callback = msg => callbackexecuted = true;
 
-        var sut = new MessagingService(new MainThreadScheduler());
+        var sut = new MessagingService(new MainThreadDispatcherFake());
 
         sut.SubscribeOnMainThread(callback);
 

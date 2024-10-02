@@ -1,10 +1,10 @@
-﻿using DjX.Mvvm.Messenger.Abstractions;
-using DjX.Mvvm.Platforms;
+﻿using DjX.Mvvm.Core.Messenger.Abstractions;
+using DjX.Mvvm.Core.Threading.Abstractions;
 using System.Collections.Concurrent;
 
-namespace DjX.Mvvm.Messenger;
+namespace DjX.Mvvm.Core.Messenger;
 
-public class MessagingService(MainThreadScheduler mainThreadRunner) : IMessagingService
+public class MessagingService(IMainThreadDispatcher mainThreadDispatcher) : IMessagingService
 {
     private readonly object locker = new();
     private readonly ConcurrentDictionary<Type, List<object>> subscriptions = new();
@@ -47,7 +47,7 @@ public class MessagingService(MainThreadScheduler mainThreadRunner) : IMessaging
 
     public void SubscribeOnMainThread<TMessage>(Action<TMessage> callback)
     {
-        var callbackEnqueuedOnMainThread = mainThreadRunner.ScheduleOnMainThread(callback);
+        var callbackEnqueuedOnMainThread = mainThreadDispatcher.ScheduleOnMainThread(callback);
 
         var actions = this.subscriptions.GetOrAdd(
             typeof(TMessage), []);

@@ -1,7 +1,6 @@
-﻿using DjX.Mvvm.Commands.Abstractions;
+﻿using DjX.Mvvm.Core.Commands.Abstractions;
 
-namespace DjX.Mvvm.Commands;
-
+namespace DjX.Mvvm.Core.Commands;
 
 public class DjXDelegateCommand<T> : IDjXCommand<T>
 {

@@ -1,6 +1,6 @@
 ﻿using System.Runtime.CompilerServices;
 
-namespace DjX.Mvvm.ViewModels;
+namespace DjX.Mvvm.Core.ViewModels;
 
 public abstract class ViewModelBase<TModel>(TModel model) : ViewModelBase
 {
