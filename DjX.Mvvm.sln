@@ -3,8 +3,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.8.34330.188
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DjX.Mvvm", "DjX.Mvvm\DjX.Mvvm.csproj", "{928A3809-4013-4BC4-A791-9153E36EB28A}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DjX.Mvvm.Core", "DjX.Mvvm.Core\DjX.Mvvm.Core.csproj", "{5E973FD1-A151-4110-AE2B-CF493D66823D}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DjX.Mvvm.Platforms.Android", "DjX.Mvvm.Platforms.Android\DjX.Mvvm.Platforms.Android.csproj", "{B6FDC400-A899-46DB-B590-21DE806EBBD4}"
@@ -19,10 +17,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{928A3809-4013-4BC4-A791-9153E36EB28A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{928A3809-4013-4BC4-A791-9153E36EB28A}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{928A3809-4013-4BC4-A791-9153E36EB28A}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{928A3809-4013-4BC4-A791-9153E36EB28A}.Release|Any CPU.Build.0 = Release|Any CPU
 		{5E973FD1-A151-4110-AE2B-CF493D66823D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{5E973FD1-A151-4110-AE2B-CF493D66823D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5E973FD1-A151-4110-AE2B-CF493D66823D}.Release|Any CPU.ActiveCfg = Release|Any CPU
