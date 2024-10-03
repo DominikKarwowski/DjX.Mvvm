@@ -10,19 +10,25 @@ public sealed class EventBindingSet : BindingSet<View, EventInfo>
 {
     private bool disposedValue;
 
+    private readonly PropertyInfo? SourceCommandParameter;
+
     public EventBindingSet(
-        INotifyPropertyChanged sourceObject,
-        PropertyInfo sourceMemberInfo,
         View targetObject,
-        EventInfo targetMemberInfo)
-        : base(sourceObject, sourceMemberInfo, targetObject, targetMemberInfo)
-        => this.TargetMemberInfo.AddEventHandler(this.TargetObject, this.OnTargetEventRaisedDelegate);
+        EventInfo targetMemberInfo,
+        INotifyPropertyChanged sourceObject,
+        PropertyInfo sourceCommandPropertyInfo,
+        PropertyInfo? sourceCommandParameterPropertyInfo)
+        : base(targetObject, targetMemberInfo, sourceObject, sourceCommandPropertyInfo)
+    {
+        this.SourceCommandParameter = sourceCommandParameterPropertyInfo;
+        this.TargetMemberInfo.AddEventHandler(this.TargetObject, this.OnTargetEventRaisedDelegate);
+    }
 
     public EventHandler? OnTargetEventRaisedDelegate => this.OnTargetEventRaised;
 
     private void OnTargetEventRaised(object? sender, EventArgs e)
     {
-        var command = this.SourceMemberInfo.GetValue(this.SourceObject) as IDjXCommand;
+        var command = this.SourcePropertyInfo.GetValue(this.SourceObject) as IDjXCommand;
         if (command?.CanExecute(null) ?? false)
         {
             command.Execute();
@@ -37,6 +43,7 @@ public sealed class EventBindingSet : BindingSet<View, EventInfo>
             {
                 this.TargetMemberInfo.RemoveEventHandler(this.TargetObject, this.OnTargetEventRaisedDelegate);
             }
+
             this.disposedValue = true;
         }
     }

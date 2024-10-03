@@ -12,14 +12,14 @@ namespace DjX.Mvvm.Platforms.Android.Support;
 public class BindableRecyclerViewAdapter<TCollectionDataType> : RecyclerView.Adapter
     where TCollectionDataType : ViewModelBase
 {
-    private readonly int _itemTemplateLayoutId;
-    private readonly Dictionary<int, string> _elementBindingsToParse = [];
+    private readonly int itemTemplateLayoutId;
+    private readonly Dictionary<int, string> elementBindingsToParse = [];
 
     public ObservableCollection<TCollectionDataType> DataSet { get; set; }
 
     public BindableRecyclerViewAdapter(ObservableCollection<TCollectionDataType> dataSet, Context context, int itemTemplateLayoutId)
     {
-        this._itemTemplateLayoutId = itemTemplateLayoutId;
+        this.itemTemplateLayoutId = itemTemplateLayoutId;
         this.DataSet = dataSet;
 
         this.SetElementBindingData(context);
@@ -39,7 +39,7 @@ public class BindableRecyclerViewAdapter<TCollectionDataType> : RecyclerView.Ada
     {
         var view = LayoutInflater.From(parent.Context)!
             .Inflate(
-                this._itemTemplateLayoutId,
+                this.itemTemplateLayoutId,
                 parent,
                 attachToRoot: false);
 
@@ -53,10 +53,10 @@ public class BindableRecyclerViewAdapter<TCollectionDataType> : RecyclerView.Ada
             return;
         }
 
-        foreach (var kvp in this._elementBindingsToParse)
+        foreach (var kvp in this.elementBindingsToParse)
         {
             var view = bindableHolder.View.FindViewById(kvp.Key)!;
-            bindableHolder.BindingObject.RegisterDeclaredBindings(this.DataSet[position], view, kvp.Value);
+            bindableHolder.BindingObject.RegisterDeclaredBindings(view, this.DataSet[position], kvp.Value);
         }
     }
 
@@ -74,7 +74,7 @@ public class BindableRecyclerViewAdapter<TCollectionDataType> : RecyclerView.Ada
 
     private void SetElementBindingData(Context context)
     {
-        using var viewXml = context.Resources?.GetXml(this._itemTemplateLayoutId);
+        using var viewXml = context.Resources?.GetXml(this.itemTemplateLayoutId);
 
         if (viewXml is null)
         {
@@ -95,7 +95,7 @@ public class BindableRecyclerViewAdapter<TCollectionDataType> : RecyclerView.Ada
 
             if (idAttr is not null && bindAttr is not null)
             {
-                this._elementBindingsToParse.Add(int.Parse(idAttr[1..]), bindAttr);
+                this.elementBindingsToParse.Add(int.Parse(idAttr[1..]), bindAttr);
             }
         }
     }

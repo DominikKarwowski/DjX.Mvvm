@@ -5,8 +5,8 @@ namespace DjX.Mvvm.Platforms.Android.Binding;
 
 public class RecyclerViewCollectionBindingSet : IDisposable
 {
-    protected readonly INotifyCollectionChanged SourceCollection;
-    protected readonly RecyclerView.Adapter TargetAdapter;
+    private readonly INotifyCollectionChanged SourceCollection;
+    private readonly RecyclerView.Adapter TargetAdapter;
 
     private bool disposedValue;
 

@@ -38,17 +38,21 @@ public abstract class ActivityBase<TViewModel> : AppCompatActivity
         }
 
         var bindingsToParse = attrs.GetAttributeValue(AndroidStrings.AppNamespace, AndroidStrings.BindAttributeName);
-        var collectionToBind = attrs.GetAttributeValue(AndroidStrings.AppNamespace, AndroidStrings.ItemSourceAttributeName);
-        var templateResourceId = attrs.GetAttributeResourceValue(AndroidStrings.AppNamespace, AndroidStrings.ItemTemplateAttributeName, 0);
 
         if (bindingsToParse is not null)
         {
-            this.bindingObject.RegisterDeclaredBindings(this.ViewModel, view, bindingsToParse);
+            this.bindingObject.RegisterDeclaredBindings(view, this.ViewModel, bindingsToParse);
         }
 
-        if (view is RecyclerView recyclerView && collectionToBind is not null && templateResourceId is not 0)
+        if (view is RecyclerView recyclerView)
         {
-            this.bindingObject.RegisterCollectionBindingSet(this.ViewModel, collectionToBind, recyclerView, templateResourceId);
+            var collectionToBind = attrs.GetAttributeValue(AndroidStrings.AppNamespace, AndroidStrings.ItemSourceAttributeName);
+            var templateResourceId = attrs.GetAttributeResourceValue(AndroidStrings.AppNamespace, AndroidStrings.ItemTemplateAttributeName, 0);
+
+            if (collectionToBind is not null && templateResourceId is not 0)
+            {
+                this.bindingObject.RegisterCollectionBindingSet(recyclerView, this.ViewModel, collectionToBind, templateResourceId);
+            }
         }
 
         return view;

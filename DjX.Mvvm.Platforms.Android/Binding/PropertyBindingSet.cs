@@ -11,11 +11,11 @@ public sealed class PropertyBindingSet : BindingSet<View, PropertyInfo>
     private bool disposedValue;
 
     public PropertyBindingSet(
-        INotifyPropertyChanged sourceObject,
-        PropertyInfo sourceMemberInfo,
         View targetObject,
-        PropertyInfo targetMemberName)
-        : base(sourceObject, sourceMemberInfo, targetObject, targetMemberName)
+        PropertyInfo targetMemberName,
+        INotifyPropertyChanged sourceObject,
+        PropertyInfo sourceMemberInfo)
+        : base(targetObject, targetMemberName, sourceObject, sourceMemberInfo)
     {
         this.SourceObject.PropertyChanged += this.OnSourcePropertyChanged;
 
@@ -29,9 +29,9 @@ public sealed class PropertyBindingSet : BindingSet<View, PropertyInfo>
 
     private void OnSourcePropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
-        if (e.PropertyName == this.SourceMemberInfo.Name)
+        if (e.PropertyName == this.SourcePropertyInfo.Name)
         {
-            var sourceValue = this.SourceMemberInfo.GetValue(this.SourceObject);
+            var sourceValue = this.SourcePropertyInfo.GetValue(this.SourceObject);
             var currentTargetValue = this.TargetMemberInfo.GetValue(this.TargetObject);
             if (!Equals(currentTargetValue, sourceValue))
             {
@@ -44,7 +44,7 @@ public sealed class PropertyBindingSet : BindingSet<View, PropertyInfo>
     {
         if (e.Text is not null)
         {
-            this.SourceMemberInfo.SetValue(this.SourceObject, string.Join("", e.Text));
+            this.SourcePropertyInfo.SetValue(this.SourceObject, string.Join("", e.Text));
         }
     }
 
@@ -61,6 +61,7 @@ public sealed class PropertyBindingSet : BindingSet<View, PropertyInfo>
                     editText.TextChanged -= this.EditText_TextChanged;
                 }
             }
+
             this.disposedValue = true;
         }
     }
