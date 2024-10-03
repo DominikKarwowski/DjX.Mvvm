@@ -2,12 +2,12 @@
 
 namespace DjX.Mvvm.Core.Commands;
 
-public class DjXDelegateCommand<T> : IDjXCommandBase
+public class DelegateCommand<T> : ICommandBase
 {
     private readonly Action<T?> _execute;
     private readonly Func<T?, bool>? _canExecute;
 
-    public DjXDelegateCommand(Action<T?> execute, Func<T?, bool>? canExecute = null)
+    public DelegateCommand(Action<T?> execute, Func<T?, bool>? canExecute = null)
     {
         ArgumentNullException.ThrowIfNull(execute);
         this._execute = execute;
@@ -24,12 +24,12 @@ public class DjXDelegateCommand<T> : IDjXCommandBase
 }
 
 
-public class DjXDelegateCommand : IDjXCommandBase
+public class DelegateCommand : ICommandBase
 {
     private readonly Action<object?> _execute;
     private readonly Func<object?, bool>? _canExecute;
 
-    public DjXDelegateCommand(Action execute, Func<bool>? canExecute = null)
+    public DelegateCommand(Action execute, Func<bool>? canExecute = null)
     {
         ArgumentNullException.ThrowIfNull(execute);
         this._execute = new Action<object?>(param => execute());
@@ -38,7 +38,7 @@ public class DjXDelegateCommand : IDjXCommandBase
             : new Func<object?, bool>(param => canExecute());
     }
 
-    public DjXDelegateCommand(Action<object?> execute, Func<object?, bool>? canExecute = null)
+    public DelegateCommand(Action<object?> execute, Func<object?, bool>? canExecute = null)
     {
         ArgumentNullException.ThrowIfNull(execute);
         this._execute = execute;

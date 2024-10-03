@@ -23,8 +23,8 @@ public abstract class ViewModelBase : INotifyPropertyChanged
     {
         var commands = this.GetType().GetProperties()
             .Where(p =>
-                p.PropertyType == typeof(DjXAsyncDelegateCommand)
-                || p.PropertyType.IsGenericType && p.PropertyType.GetGenericTypeDefinition() == typeof(DjXAsyncDelegateCommand<>))
+                p.PropertyType == typeof(AsyncDelegateCommand)
+                || p.PropertyType.IsGenericType && p.PropertyType.GetGenericTypeDefinition() == typeof(AsyncDelegateCommand<>))
             .Select(p => p.GetValue(this));
 
         foreach (var command in commands)
