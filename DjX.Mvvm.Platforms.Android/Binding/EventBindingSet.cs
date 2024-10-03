@@ -1,6 +1,6 @@
 ﻿using Android.Views;
 using DjX.Mvvm.Core.Binding.Abstractions;
-using DjX.Mvvm.Core.Commands.Abstractions;
+using DjX.Mvvm.Core.Commands;
 using System.ComponentModel;
 using System.Reflection;
 
@@ -28,10 +28,21 @@ public sealed class EventBindingSet : BindingSet<View, EventInfo>
 
     private void OnTargetEventRaised(object? sender, EventArgs e)
     {
-        var command = this.SourcePropertyInfo.GetValue(this.SourceObject) as IDjXCommand;
-        if (command?.CanExecute(null) ?? false)
+        var command = this.SourcePropertyInfo.GetValue(this.SourceObject);
+
+        if (command is null)
         {
-            command.Execute();
+            return;
+        }
+
+        var commandType = command.GetType();
+
+        if (commandType == typeof(DelegateCommand))
+        {
+            if (((DelegateCommand)command).CanExecute(null))
+            {
+                ((DelegateCommand)command).Execute();
+            }
         }
     }
 
