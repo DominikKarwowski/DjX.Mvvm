@@ -2,11 +2,10 @@
 
 namespace DjX.Mvvm.Core.Commands;
 
-
 //https://learn.microsoft.com/en-us/archive/msdn-magazine/2014/april/async-programming-patterns-for-asynchronous-mvvm-applications-commands
 //https://johnthiriet.com/mvvm-going-async-with-async-command/
 
-public class DjXAsyncDelegateCommand<T> : IDjXAsyncCommand<T>, IDisposable
+public class DjXAsyncDelegateCommand<T> : IDjXCommandBase, IDisposable
 {
     private readonly Func<T?, Task> _execute;
     private readonly Func<T?, bool>? _canExecute;
@@ -60,7 +59,7 @@ public class DjXAsyncDelegateCommand<T> : IDjXAsyncCommand<T>, IDisposable
     }
 }
 
-public class DjXAsyncDelegateCommand : IDjXAsyncCommand, IDisposable
+public class DjXAsyncDelegateCommand : IDjXCommandBase, IDisposable
 {
     private readonly Func<object?, Task> _execute;
     private readonly Func<object?, bool>? _canExecute;

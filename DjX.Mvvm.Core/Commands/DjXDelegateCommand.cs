@@ -2,7 +2,7 @@
 
 namespace DjX.Mvvm.Core.Commands;
 
-public class DjXDelegateCommand<T> : IDjXCommand<T>
+public class DjXDelegateCommand<T> : IDjXCommandBase
 {
     private readonly Action<T?> _execute;
     private readonly Func<T?, bool>? _canExecute;
@@ -24,7 +24,7 @@ public class DjXDelegateCommand<T> : IDjXCommand<T>
 }
 
 
-public class DjXDelegateCommand : IDjXCommand
+public class DjXDelegateCommand : IDjXCommandBase
 {
     private readonly Action<object?> _execute;
     private readonly Func<object?, bool>? _canExecute;

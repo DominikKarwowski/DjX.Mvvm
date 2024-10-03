@@ -1,4 +1,4 @@
-﻿using DjX.Mvvm.Core.Commands.Abstractions;
+﻿using DjX.Mvvm.Core.Commands;
 using DjX.Mvvm.Core.Navigation;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
@@ -23,8 +23,8 @@ public abstract class ViewModelBase : INotifyPropertyChanged
     {
         var commands = this.GetType().GetProperties()
             .Where(p =>
-                p.PropertyType == typeof(IDjXAsyncCommand)
-                || p.PropertyType.IsGenericType && p.PropertyType.GetGenericTypeDefinition() == typeof(IDjXAsyncCommand<>))
+                p.PropertyType == typeof(DjXAsyncDelegateCommand)
+                || p.PropertyType.IsGenericType && p.PropertyType.GetGenericTypeDefinition() == typeof(DjXAsyncDelegateCommand<>))
             .Select(p => p.GetValue(this));
 
         foreach (var command in commands)
