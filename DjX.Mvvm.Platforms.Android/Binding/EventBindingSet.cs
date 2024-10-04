@@ -1,6 +1,7 @@
 ﻿using Android.Views;
 using DjX.Mvvm.Core.Binding.Abstractions;
 using DjX.Mvvm.Core.Commands;
+using DjX.Mvvm.Core.Commands.Abstractions;
 using System.ComponentModel;
 using System.Reflection;
 
@@ -26,8 +27,9 @@ public sealed class EventBindingSet : BindingSet<View, EventInfo>
 
     public EventHandler? OnTargetEventRaisedDelegate => this.OnTargetEventRaised;
 
-    private void OnTargetEventRaised(object? sender, EventArgs e)
+    private async void OnTargetEventRaised(object? sender, EventArgs e)
     {
+        // TODO: refactor the below mosntrosity and also test async commands appropriately
         var command = this.SourcePropertyInfo.GetValue(this.SourceObject);
 
         if (command is null)
@@ -39,9 +41,53 @@ public sealed class EventBindingSet : BindingSet<View, EventInfo>
 
         if (commandType == typeof(DelegateCommand))
         {
-            if (((DelegateCommand)command).CanExecute(null))
+            if (((ICommandBase)command).CanExecute(null))
             {
                 ((DelegateCommand)command).Execute();
+            }
+        }
+        else if (commandType == typeof(AsyncDelegateCommand))
+        {
+            if (((ICommandBase)command).CanExecute(null))
+            {
+                await ((AsyncDelegateCommand)command).ExecuteAsync();
+            }
+        }
+        else
+        {
+            if (!commandType.IsGenericType)
+            {
+                return;
+            }
+
+            var commandTypeGeneric = commandType.GetGenericTypeDefinition();
+            var paramType = commandType.GetGenericArguments()[0];
+
+            if (this.SourceCommandParameter is not null && paramType != this.SourceCommandParameter.PropertyType)
+            {
+                return;
+            }
+
+            var sourceCommandParameterValue = this.SourceCommandParameter?.GetValue(this.SourceObject);
+
+            if (commandTypeGeneric == typeof(DelegateCommand<>))
+            {
+                if (((ICommandBase)command).CanExecute(this.SourceCommandParameter))
+                {
+                    var concreteCommandType = commandTypeGeneric.MakeGenericType([paramType]);
+                    _ = concreteCommandType.GetMethod("Execute", [paramType])!
+                        .Invoke(command, [sourceCommandParameterValue]);
+                }
+            }
+            else if (commandTypeGeneric == typeof(AsyncDelegateCommand<>))
+            {
+                if (((ICommandBase)command).CanExecute(this.SourceCommandParameter))
+                {
+                    var concreteCommandType = commandTypeGeneric.MakeGenericType([paramType]);
+                    var task = (Task)concreteCommandType.GetMethod("ExecuteAsync", [paramType])!
+                        .Invoke(command, [sourceCommandParameterValue])!;
+                    await task.ConfigureAwait(false);
+                }
             }
         }
     }
