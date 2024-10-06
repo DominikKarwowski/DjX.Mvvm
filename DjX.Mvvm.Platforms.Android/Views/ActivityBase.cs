@@ -37,11 +37,11 @@ public abstract class ActivityBase<TViewModel> : AppCompatActivity
             return view;
         }
 
-        var bindingsToParse = attrs.GetAttributeValue(AndroidStrings.AppNamespace, AndroidStrings.BindAttributeName);
+        var bindingDeclaration = attrs.GetAttributeValue(AndroidStrings.AppNamespace, AndroidStrings.BindAttributeName);
 
-        if (bindingsToParse is not null)
+        if (bindingDeclaration is not null)
         {
-            this.bindingObject.RegisterDeclaredBindings(view, this.ViewModel, bindingsToParse);
+            this.bindingObject.RegisterDeclaredBindings(view, this.ViewModel, bindingDeclaration);
         }
 
         if (view is RecyclerView recyclerView)
@@ -51,7 +51,14 @@ public abstract class ActivityBase<TViewModel> : AppCompatActivity
 
             if (collectionToBind is not null && templateResourceId is not 0)
             {
-                this.bindingObject.RegisterCollectionBindingSet(recyclerView, this.ViewModel, collectionToBind, templateResourceId);
+                var itemBindingDeclaration = attrs.GetAttributeValue(AndroidStrings.AppNamespace, AndroidStrings.ItemBindAttributeName);
+
+                this.bindingObject.RegisterCollectionBindingSet(
+                    recyclerView,
+                    this.ViewModel,
+                    collectionToBind,
+                    templateResourceId,
+                    itemBindingDeclaration);
             }
         }
 
@@ -60,7 +67,7 @@ public abstract class ActivityBase<TViewModel> : AppCompatActivity
 
     protected override void OnCreate(Bundle? savedInstanceState)
     {
-        if (this.Application is not ApplicationBase djXApplication)
+        if (this.Application is not ApplicationBase app)
         {
             throw new InvalidOperationException($"Application must be of type {nameof(ApplicationBase)}");
         }
@@ -69,8 +76,8 @@ public abstract class ActivityBase<TViewModel> : AppCompatActivity
         var modelType = (this.Intent?.Extras?.GetBinder("modelType") as NavigationDataBinder)?.Data as Type;
 
         this.ViewModel = modelType is not null
-            ? djXApplication.GetViewModelFactory<TViewModel>().CreateViewModel(model, modelType)
-            : djXApplication.GetViewModelFactory<TViewModel>().CreateViewModel();
+            ? app.GetViewModelFactory<TViewModel>().CreateViewModel(model, modelType)
+            : app.GetViewModelFactory<TViewModel>().CreateViewModel();
 
         base.OnCreate(savedInstanceState);
     }

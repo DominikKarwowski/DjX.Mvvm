@@ -2,8 +2,8 @@
 <resources>
 	<declare-styleable name="View">
 		<attr name="bind" format="string"/>
+		<attr name="item_bind" format="string"/>
 		<attr name="item_source" format="string"/>
 		<attr name="item_template" format="reference"/>
-		<attr name="item_bind" format="reference"/>
 	</declare-styleable>
 </resources>

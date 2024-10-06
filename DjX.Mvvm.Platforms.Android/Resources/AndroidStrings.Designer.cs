@@ -88,6 +88,15 @@ namespace DjX.Mvvm.Platforms.Android.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to item_bind.
+        /// </summary>
+        internal static string ItemBindAttributeName {
+            get {
+                return ResourceManager.GetString("ItemBindAttributeName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to item_source.
         /// </summary>
         internal static string ItemSourceAttributeName {

@@ -135,4 +135,7 @@
   <data name="ItemTemplateAttributeName" xml:space="preserve">
     <value>item_template</value>
   </data>
+  <data name="ItemBindAttributeName" xml:space="preserve">
+    <value>item_bind</value>
+  </data>
 </root>

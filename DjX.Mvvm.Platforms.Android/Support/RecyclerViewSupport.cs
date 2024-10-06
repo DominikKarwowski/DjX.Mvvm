@@ -13,13 +13,21 @@ public class BindableRecyclerViewAdapter<TCollectionDataType> : RecyclerView.Ada
     where TCollectionDataType : ViewModelBase
 {
     private readonly int itemTemplateLayoutId;
-    private readonly Dictionary<int, string> elementBindingsToParse = [];
+    private readonly string? itemBindingDeclaration;
+    private readonly Dictionary<int, string> elementBindingDeclarations = [];
+    private readonly ViewModelBase ParentViewModel;
+    private readonly ObservableCollection<TCollectionDataType> DataSet;
 
-    public ObservableCollection<TCollectionDataType> DataSet { get; set; }
-
-    public BindableRecyclerViewAdapter(ObservableCollection<TCollectionDataType> dataSet, Context context, int itemTemplateLayoutId)
+    public BindableRecyclerViewAdapter(
+        ObservableCollection<TCollectionDataType> dataSet,
+        ViewModelBase parentViewModel,
+        Context context,
+        int itemTemplateLayoutId,
+        string? itemBindingDeclaration)
     {
         this.itemTemplateLayoutId = itemTemplateLayoutId;
+        this.itemBindingDeclaration = itemBindingDeclaration;
+        this.ParentViewModel = parentViewModel;
         this.DataSet = dataSet;
 
         this.SetElementBindingData(context);
@@ -53,7 +61,13 @@ public class BindableRecyclerViewAdapter<TCollectionDataType> : RecyclerView.Ada
             return;
         }
 
-        foreach (var kvp in this.elementBindingsToParse)
+        if (this.itemBindingDeclaration is not null)
+        {
+            bindableHolder.BindingObject.RegisterCollectionItemDeclaredEventBindings(
+                bindableHolder.View, this.ParentViewModel, this.itemBindingDeclaration, this.DataSet[position]);
+        }
+
+        foreach (var kvp in this.elementBindingDeclarations)
         {
             var view = bindableHolder.View.FindViewById(kvp.Key)!;
             bindableHolder.BindingObject.RegisterDeclaredBindings(view, this.DataSet[position], kvp.Value);
@@ -95,7 +109,7 @@ public class BindableRecyclerViewAdapter<TCollectionDataType> : RecyclerView.Ada
 
             if (idAttr is not null && bindAttr is not null)
             {
-                this.elementBindingsToParse.Add(int.Parse(idAttr[1..]), bindAttr);
+                this.elementBindingDeclarations.Add(int.Parse(idAttr[1..]), bindAttr);
             }
         }
     }

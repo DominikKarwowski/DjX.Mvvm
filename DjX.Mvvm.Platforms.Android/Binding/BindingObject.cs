@@ -13,16 +13,50 @@ public sealed class BindingObject : IDisposable
     private List<PropertyBindingSet> PropertyBindings { get; } = [];
     private List<EventBindingSet> EventBindings { get; } = [];
     private List<RecyclerViewCollectionBindingSet> CollectionBindings { get; } = [];
+    private List<CollectionItemEventBindingSet> CollectionItemEventBindings { get; } = [];
 
     public void RegisterDeclaredBindings(View targetObject, ViewModelBase sourceObject, string bindingDeclaration)
         => ParseBindingDeclaration(bindingDeclaration)
             .ForEach(b => this.RegisterBindingSet(targetObject, sourceObject, b));
 
+    public void RegisterCollectionItemDeclaredEventBindings(
+        View targetObject,
+        ViewModelBase sourceObject,
+        string eventBindingDeclaration,
+        ViewModelBase commandParam)
+    {
+        var bindings = ParseBindingDeclaration(eventBindingDeclaration);
+
+        foreach (var parsedBinding in bindings)
+        {
+            var sourceProperty = sourceObject.GetType().GetProperty(parsedBinding.SourceMemberName);
+
+            if (sourceProperty is null)
+            {
+                return;
+            }
+
+            var targetMembers = targetObject.GetType().GetMember(parsedBinding.TargetMemberName);
+
+            if (targetMembers.Length != 1)
+            {
+                return;
+            }
+
+            if (targetMembers[0] is EventInfo targetEvent)
+            {
+                this.CollectionItemEventBindings.Add(
+                    new CollectionItemEventBindingSet(targetObject, targetEvent, sourceObject, sourceProperty, commandParam));
+            }
+        }
+    }
+
     public void RegisterCollectionBindingSet(
         RecyclerView targetObject,
         ViewModelBase sourceObject,
         string sourceCollectionName,
-        int viewTemplateId)
+        int viewTemplateId,
+        string? itemBindingDeclaration)
     {
         var sourceCollection = sourceObject
             .GetType()
@@ -42,7 +76,7 @@ public sealed class BindingObject : IDisposable
         {
             var adapterType = typeof(BindableRecyclerViewAdapter<>).MakeGenericType(sourceCollectionItemType);
             var adapter = (RecyclerView.Adapter)Activator.CreateInstance(
-                adapterType, [sourceCollection, targetObject.Context, viewTemplateId])!;
+                adapterType, [sourceCollection, sourceObject, targetObject.Context, viewTemplateId, itemBindingDeclaration])!;
 
             targetObject.SetAdapter(adapter);
 
@@ -56,7 +90,9 @@ public sealed class BindingObject : IDisposable
         this.PropertyBindings.ForEach(pb => pb.Dispose());
         this.EventBindings.ForEach(eb => eb.Dispose());
         this.CollectionBindings.ForEach(cb => cb.Dispose());
+        this.CollectionItemEventBindings.ForEach(cieb => cieb.Dispose());
     }
+
     private void RegisterBindingSet(View targetObject, ViewModelBase sourceObject, BindingDeclaration parsedBinding)
     {
         var sourceProperty = sourceObject.GetType().GetProperty(parsedBinding.SourceMemberName);

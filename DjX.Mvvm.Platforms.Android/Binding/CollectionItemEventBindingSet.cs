@@ -2,35 +2,38 @@
 using DjX.Mvvm.Core.Binding.Abstractions;
 using DjX.Mvvm.Core.Commands;
 using DjX.Mvvm.Core.Commands.Abstractions;
+using DjX.Mvvm.Core.ViewModels;
 using System.ComponentModel;
 using System.Reflection;
 
 namespace DjX.Mvvm.Platforms.Android.Binding;
 
-public sealed class EventBindingSet : BindingSet<View, EventInfo>
+public class CollectionItemEventBindingSet : BindingSet<View, EventInfo>
 {
     private bool disposedValue;
 
-    private readonly PropertyInfo? SourceCommandParameter;
+    private readonly ViewModelBase SourceCommandParameter;
 
-    public EventBindingSet(
+    public CollectionItemEventBindingSet(
         View targetObject,
         EventInfo targetMemberInfo,
         INotifyPropertyChanged sourceObject,
         PropertyInfo sourceCommandPropertyInfo,
-        PropertyInfo? sourceCommandParameterPropertyInfo)
+        ViewModelBase sourceCommandParameter)
         : base(targetObject, targetMemberInfo, sourceObject, sourceCommandPropertyInfo)
     {
-        this.SourceCommandParameter = sourceCommandParameterPropertyInfo;
+        this.SourceCommandParameter = sourceCommandParameter;
         this.TargetMemberInfo.AddEventHandler(this.TargetObject, this.OnTargetEventRaisedDelegate);
+
     }
 
+    // TODO: add support for a LongClick event, which requires generic EventHandler<T>
     public EventHandler? OnTargetEventRaisedDelegate => this.OnTargetEventRaised;
 
     private async void OnTargetEventRaised(object? sender, EventArgs e)
     {
         // TODO: refactor the below monstrosity and also test async commands appropriately
-        // refer to CollectionItemEventBindingSet class
+        // refer to EventBindingSet class
         var command = this.SourcePropertyInfo.GetValue(this.SourceObject);
 
         if (command is null)
@@ -65,20 +68,13 @@ public sealed class EventBindingSet : BindingSet<View, EventInfo>
             var commandTypeGeneric = commandType.GetGenericTypeDefinition();
             var paramType = commandType.GetGenericArguments()[0];
 
-            if (this.SourceCommandParameter is not null && paramType != this.SourceCommandParameter.PropertyType)
-            {
-                return;
-            }
-
-            var sourceCommandParameterValue = this.SourceCommandParameter?.GetValue(this.SourceObject);
-
             if (commandTypeGeneric == typeof(DelegateCommand<>))
             {
                 if (((ICommandBase)command).CanExecute(this.SourceCommandParameter))
                 {
                     var concreteCommandType = commandTypeGeneric.MakeGenericType([paramType]);
                     _ = concreteCommandType.GetMethod("Execute", [paramType])!
-                        .Invoke(command, [sourceCommandParameterValue]);
+                        .Invoke(command, [this.SourceCommandParameter]);
                 }
             }
             else if (commandTypeGeneric == typeof(AsyncDelegateCommand<>))
@@ -87,7 +83,7 @@ public sealed class EventBindingSet : BindingSet<View, EventInfo>
                 {
                     var concreteCommandType = commandTypeGeneric.MakeGenericType([paramType]);
                     var task = (Task)concreteCommandType.GetMethod("ExecuteAsync", [paramType])!
-                        .Invoke(command, [sourceCommandParameterValue])!;
+                        .Invoke(command, [this.SourceCommandParameter])!;
                     // TODO: should I keep ConfigureAwait(false) or leave it to the client code to decide? certainly should be conherent with unparametrised async command
                     await task.ConfigureAwait(false);
                 }
