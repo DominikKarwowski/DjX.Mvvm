@@ -37,7 +37,7 @@ public abstract class ActivityBase<TViewModel> : AppCompatActivity
             return view;
         }
 
-        var bindingDeclaration = attrs.GetAttributeValue(AndroidStrings.AppNamespace, AndroidStrings.BindAttributeName);
+        var bindingDeclaration = attrs.GetAttributeValue(AttributeStrings.AppNamespace, AttributeStrings.BindAttributeName);
 
         if (bindingDeclaration is not null)
         {
@@ -46,12 +46,12 @@ public abstract class ActivityBase<TViewModel> : AppCompatActivity
 
         if (view is RecyclerView recyclerView)
         {
-            var collectionToBind = attrs.GetAttributeValue(AndroidStrings.AppNamespace, AndroidStrings.ItemSourceAttributeName);
-            var templateResourceId = attrs.GetAttributeResourceValue(AndroidStrings.AppNamespace, AndroidStrings.ItemTemplateAttributeName, 0);
+            var collectionToBind = attrs.GetAttributeValue(AttributeStrings.AppNamespace, AttributeStrings.ItemSourceAttributeName);
+            var templateResourceId = attrs.GetAttributeResourceValue(AttributeStrings.AppNamespace, AttributeStrings.ItemTemplateAttributeName, 0);
 
             if (collectionToBind is not null && templateResourceId is not 0)
             {
-                var itemBindingDeclaration = attrs.GetAttributeValue(AndroidStrings.AppNamespace, AndroidStrings.ItemBindAttributeName);
+                var itemBindingDeclaration = attrs.GetAttributeValue(AttributeStrings.AppNamespace, AttributeStrings.ItemBindAttributeName);
 
                 this.bindingObject.RegisterCollectionBindingSet(
                     recyclerView,
@@ -72,8 +72,8 @@ public abstract class ActivityBase<TViewModel> : AppCompatActivity
             throw new InvalidOperationException($"Application must be of type {nameof(ApplicationBase)}");
         }
 
-        var model = (this.Intent?.Extras?.GetBinder("model") as NavigationDataBinder)?.Data;
-        var modelType = (this.Intent?.Extras?.GetBinder("modelType") as NavigationDataBinder)?.Data as Type;
+        var model = (this.Intent?.Extras?.GetBinder(NavigationStrings.Model) as NavigationDataBinder)?.Data;
+        var modelType = (this.Intent?.Extras?.GetBinder(NavigationStrings.ModelType) as NavigationDataBinder)?.Data as Type;
 
         this.ViewModel = modelType is not null
             ? app.GetViewModelFactory<TViewModel>().CreateViewModel(model, modelType)
@@ -111,7 +111,7 @@ public abstract class ActivityBase<TViewModel> : AppCompatActivity
 
     protected override void OnActivityResult(int requestCode, [GeneratedEnum] Result resultCode, Intent? data)
     {
-        var resultData = (data?.Extras?.GetBinder(NavigationHandlers.ResultData) as NavigationDataBinder)?.Data;
+        var resultData = (data?.Extras?.GetBinder(NavigationStrings.ResultData) as NavigationDataBinder)?.Data;
 
         if (resultData is null)
         {

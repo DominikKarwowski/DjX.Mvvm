@@ -2,14 +2,13 @@
 using AndroidX.AppCompat.App;
 using DjX.Mvvm.Core.Navigation;
 using DjX.Mvvm.Core.ViewModels.Attributes;
+using DjX.Mvvm.Platforms.Android.Resources;
 using System.Reflection;
 
 namespace DjX.Mvvm.Platforms.Android.Navigation;
 
 public static class NavigationHandlers
 {
-    public const string ResultData = "resultData";
-
     public static void NavigateTo(
         AppCompatActivity activity,
         NavigationService navigationService,
@@ -72,7 +71,7 @@ public static class NavigationHandlers
         // to allow client code to explicitly couple NavigateTo with Close
         // TODO: handle failed result case - create a custom enum value - but how?!
         var bundle = new Bundle();
-        bundle.PutBinder(ResultData, new NavigationDataBinder(resultData));
+        bundle.PutBinder(NavigationStrings.ResultData, new NavigationDataBinder(resultData));
 
         var result = viewResultStatus switch
         {
@@ -137,8 +136,8 @@ public static class NavigationHandlers
         if (modelType is not null)
         {
             var bundle = new Bundle();
-            bundle.PutBinder("model", new NavigationDataBinder(model));
-            bundle.PutBinder("modelType", new NavigationDataBinder(modelType));
+            bundle.PutBinder(NavigationStrings.Model, new NavigationDataBinder(model));
+            bundle.PutBinder(NavigationStrings.ModelType, new NavigationDataBinder(modelType));
 
             _ = intent.PutExtras(bundle);
         }
