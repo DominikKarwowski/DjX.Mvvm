@@ -72,8 +72,24 @@ public abstract class ActivityBase<TViewModel> : AppCompatActivity
             throw new InvalidOperationException($"Application must be of type {nameof(ApplicationBase)}");
         }
 
-        var model = (this.Intent?.Extras?.GetBinder(NavigationStrings.Model) as NavigationDataBinder)?.Data;
-        var modelType = (this.Intent?.Extras?.GetBinder(NavigationStrings.ModelType) as NavigationDataBinder)?.Data as Type;
+        if (this.Intent?.Extras is null)
+        {
+            this.ViewModel = app.GetViewModelFactory<TViewModel>().CreateViewModel();
+            base.OnCreate(savedInstanceState);
+            return;
+        }
+
+        var viewModel = (this.Intent.Extras.GetBinder(NavigationStrings.ViewModel) as NavigationDataBinder<TViewModel>)?.Data;
+
+        if (viewModel is not null)
+        {
+            this.ViewModel = viewModel;
+            base.OnCreate(savedInstanceState);
+            return;
+        }
+
+        var model = (this.Intent.Extras.GetBinder(NavigationStrings.Model) as NavigationDataBinder)?.Data;
+        var modelType = (this.Intent.Extras.GetBinder(NavigationStrings.ModelType) as NavigationDataBinder)?.Data as Type;
 
         this.ViewModel = modelType is not null
             ? app.GetViewModelFactory<TViewModel>().CreateViewModel(model, modelType)
@@ -145,6 +161,7 @@ public abstract class ActivityBase<TViewModel> : AppCompatActivity
     private void SubscribeToNavigationEvents()
     {
         this.NavigationService.NavigationToRequested += this.NavigateTo;
+        this.NavigationService.NavigationWithViewModelToRequested += this.NavigateWithViewModelTo;
         this.NavigationService.NavigationWithModelToRequested += this.NavigateWithModelTo;
         this.NavigationService.NavigationWithModelForResultToRequested += this.NavigateWithModelForResultTo;
         this.NavigationService.NavigationCloseRequested += this.NavigateClose;
@@ -154,6 +171,7 @@ public abstract class ActivityBase<TViewModel> : AppCompatActivity
     private void UnsubscribeFromNavigationEvents()
     {
         this.NavigationService.NavigationToRequested -= this.NavigateTo;
+        this.NavigationService.NavigationWithViewModelToRequested -= this.NavigateWithViewModelTo;
         this.NavigationService.NavigationWithModelToRequested -= this.NavigateWithModelTo;
         this.NavigationService.NavigationWithModelForResultToRequested -= this.NavigateWithModelForResultTo;
         this.NavigationService.NavigationCloseRequested -= this.NavigateClose;
@@ -162,6 +180,9 @@ public abstract class ActivityBase<TViewModel> : AppCompatActivity
 
     private void NavigateTo(Type viewModelType)
         => NavigationHandlers.NavigateTo(this, this.NavigationService, viewModelType);
+
+    private void NavigateWithViewModelTo(Type viewModelType, ViewModelBase viewModel)
+        => NavigationHandlers.NavigateWithViewModelTo(this, this.NavigationService, viewModelType, viewModel);
 
     private void NavigateWithModelTo(Type viewModelType, Type modelType, object? model)
         => NavigationHandlers.NavigateWithModelTo(this, this.NavigationService, viewModelType, modelType, model);

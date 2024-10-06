@@ -1,9 +1,11 @@
 ﻿using Android.Content;
 using AndroidX.AppCompat.App;
 using DjX.Mvvm.Core.Navigation;
+using DjX.Mvvm.Core.ViewModels;
 using DjX.Mvvm.Core.ViewModels.Attributes;
 using DjX.Mvvm.Platforms.Android.Resources;
 using System.Reflection;
+using AndroidOS = Android.OS;
 
 namespace DjX.Mvvm.Platforms.Android.Navigation;
 
@@ -14,7 +16,28 @@ public static class NavigationHandlers
         NavigationService navigationService,
         Type viewModelType)
     {
-        var intent = CreateIntent(activity, navigationService, viewModelType);
+        var intent = NavigationIntentBuilder
+            .CreateIntent(activity, navigationService, viewModelType)
+            .Build();
+
+        if (intent is null)
+        {
+            return;
+        }
+
+        activity.StartActivity(intent);
+    }
+
+    public static void NavigateWithViewModelTo(
+        AppCompatActivity activity,
+        NavigationService navigationService,
+        Type viewModelType,
+        ViewModelBase viewModel)
+    {
+        var intent = NavigationIntentBuilder
+            .CreateIntent(activity, navigationService, viewModelType)
+            .SetViewModel(viewModelType, viewModel)
+            .Build();
 
         if (intent is null)
         {
@@ -31,7 +54,10 @@ public static class NavigationHandlers
         Type modelType,
         object? model)
     {
-        var intent = CreateIntent(activity, navigationService, viewModelType, modelType, model);
+        var intent = NavigationIntentBuilder
+            .CreateIntent(activity, navigationService, viewModelType)
+            .SetModel(modelType, model)
+            .Build();
 
         if (intent is null)
         {
@@ -48,7 +74,10 @@ public static class NavigationHandlers
         Type modelType,
         object? model)
     {
-        var intent = CreateIntent(activity, navigationService, viewModelType, modelType, model);
+        var intent = NavigationIntentBuilder
+            .CreateIntent(activity, navigationService, viewModelType)
+            .SetModel(modelType, model)
+            .Build();
 
         if (intent is null)
         {
@@ -86,6 +115,71 @@ public static class NavigationHandlers
 
         activity.Finish();
     }
+}
+
+public class NavigationIntentBuilder
+{
+    private Intent? Intent { get; }
+
+    private NavigationIntentBuilder()
+    {
+    }
+
+    private NavigationIntentBuilder(Intent? intent)
+        => this.Intent = intent;
+
+    public static NavigationIntentBuilder CreateIntent(
+        AppCompatActivity activity,
+        NavigationService navigationService,
+        Type viewModelType)
+    {
+        var viewType = GetViewForViewModel(navigationService, viewModelType);
+
+        return viewType is null
+            ? new NavigationIntentBuilder()
+            : new NavigationIntentBuilder(new Intent(activity, viewType));
+    }
+
+    public NavigationIntentBuilder SetViewModel(
+        Type viewModelType,
+        object? viewModel)
+    {
+        if (this.Intent is null)
+        {
+            return new NavigationIntentBuilder();
+        }
+
+        var bundle = new Bundle();
+
+        var binderType = typeof(NavigationDataBinder<>).MakeGenericType(viewModelType);
+        var binder = (AndroidOS.Binder)Activator.CreateInstance(binderType, viewModel)!;
+
+        bundle.PutBinder(NavigationStrings.ViewModel, binder);
+
+        var intent = this.Intent.PutExtras(bundle);
+
+        return new NavigationIntentBuilder(intent);
+    }
+
+    public NavigationIntentBuilder SetModel(
+        Type modelType,
+        object? model)
+    {
+        if (this.Intent is null)
+        {
+            return new NavigationIntentBuilder();
+        }
+
+        var bundle = new Bundle();
+        bundle.PutBinder(NavigationStrings.Model, new NavigationDataBinder(model));
+        bundle.PutBinder(NavigationStrings.ModelType, new NavigationDataBinder(modelType));
+
+        var intent = this.Intent.PutExtras(bundle);
+
+        return new NavigationIntentBuilder(intent);
+    }
+
+    public Intent? Build() => this.Intent;
 
     private static Type? GetViewForViewModel(
         NavigationService navigationService,
@@ -116,32 +210,4 @@ public static class NavigationHandlers
             .Where(a =>
                 a.FullName?.StartsWith(navigationService.ViewsAssemblyName) ?? false)
             .FirstOrDefault();
-
-    private static Intent? CreateIntent(
-        AppCompatActivity activity,
-        NavigationService navigationService,
-        Type viewModelType,
-        Type? modelType = null,
-        object? model = null)
-    {
-        var viewType = GetViewForViewModel(navigationService, viewModelType);
-
-        if (viewType is null)
-        {
-            return null;
-        }
-
-        var intent = new Intent(activity, viewType);
-
-        if (modelType is not null)
-        {
-            var bundle = new Bundle();
-            bundle.PutBinder(NavigationStrings.Model, new NavigationDataBinder(model));
-            bundle.PutBinder(NavigationStrings.ModelType, new NavigationDataBinder(modelType));
-
-            _ = intent.PutExtras(bundle);
-        }
-
-        return intent;
-    }
 }

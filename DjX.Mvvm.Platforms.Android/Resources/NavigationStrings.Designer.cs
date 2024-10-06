@@ -86,5 +86,14 @@ namespace DjX.Mvvm.Platforms.Android.Resources {
                 return ResourceManager.GetString("ResultData", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to viewModel.
+        /// </summary>
+        internal static string ViewModel {
+            get {
+                return ResourceManager.GetString("ViewModel", resourceCulture);
+            }
+        }
     }
 }

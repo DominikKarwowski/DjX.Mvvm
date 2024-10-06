@@ -16,6 +16,8 @@ public class NavigationService(string viewsAssemblyName, string viewsNamespace)
 
     public event Action<Type>? NavigationToRequested;
 
+    public event Action<Type, ViewModelBase>? NavigationWithViewModelToRequested;
+
     public event Action<Type, Type, object?>? NavigationWithModelToRequested;
 
     public event Action<Type, Type, object?>? NavigationWithModelForResultToRequested;
@@ -26,6 +28,9 @@ public class NavigationService(string viewsAssemblyName, string viewsNamespace)
 
     public void NavigateTo<TViewModel>() where TViewModel : ViewModelBase
         => NavigationToRequested?.Invoke(typeof(TViewModel));
+
+    public void NavigateWithViewModelTo<TViewModel>(TViewModel viewModel) where TViewModel : ViewModelBase
+        => NavigationWithViewModelToRequested?.Invoke(typeof(TViewModel), viewModel);
 
     public void NavigateWithModelTo<TViewModel, TModel>(TModel model)
         where TViewModel : ViewModelBase<TModel>

@@ -104,8 +104,8 @@ public class BindableRecyclerViewAdapter<TCollectionDataType> : RecyclerView.Ada
                 continue;
             }
 
-            var idAttr = viewXml.GetAttribute(AndroidStrings.IdAttributeName, AndroidStrings.Namespace);
-            var bindAttr = viewXml.GetAttribute(AndroidStrings.BindAttributeName, AndroidStrings.AppNamespace);
+            var idAttr = viewXml.GetAttribute(AttributeStrings.IdAttributeName, AttributeStrings.Namespace);
+            var bindAttr = viewXml.GetAttribute(AttributeStrings.BindAttributeName, AttributeStrings.AppNamespace);
 
             if (idAttr is not null && bindAttr is not null)
             {

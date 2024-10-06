@@ -126,4 +126,7 @@
   <data name="ResultData" xml:space="preserve">
     <value>resultData</value>
   </data>
+  <data name="ViewModel" xml:space="preserve">
+    <value>viewModel</value>
+  </data>
 </root>
