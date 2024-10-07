@@ -47,3 +47,12 @@ public class NavigationService(string viewsAssemblyName, string viewsNamespace)
     public void CloseCurrentWithResult(ResultStatus resultStatus, object resultData)
         => NavigationCloseWithResultRequested?.Invoke(resultStatus, resultData);
 }
+
+public enum RequestedNavigationTo
+{
+    Undefined = 0,
+    NewViewModel,
+    ExistingViewModel,
+    NewViewModelWithModel,
+    NewViewModelWithModelForResult,
+}

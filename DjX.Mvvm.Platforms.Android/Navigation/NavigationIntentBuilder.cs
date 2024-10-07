@@ -11,23 +11,33 @@ public class NavigationIntentBuilder
 {
     private Intent? Intent { get; }
 
+    private Bundle Bundle { get; } = new();
+
     private NavigationIntentBuilder()
     {
     }
 
-    private NavigationIntentBuilder(Intent? intent)
-        => this.Intent = intent;
+    private NavigationIntentBuilder(Intent? intent, Bundle bundle)
+        => (this.Intent, this.Bundle) = (intent, bundle);
 
     public static NavigationIntentBuilder CreateIntent(
+        RequestedNavigationTo navigationType,
         AppCompatActivity activity,
         NavigationService navigationService,
         Type viewModelType)
     {
         var viewType = GetViewForViewModel(navigationService, viewModelType);
 
-        return viewType is null
-            ? new NavigationIntentBuilder()
-            : new NavigationIntentBuilder(new Intent(activity, viewType));
+        if (viewType is null)
+        {
+            return new NavigationIntentBuilder();
+        }
+
+        var bundle = new Bundle();
+
+        bundle.PutInt(NavigationStrings.NavigationType, (int)navigationType);
+
+        return new NavigationIntentBuilder(new Intent(activity, viewType), bundle);
     }
 
     public NavigationIntentBuilder SetViewModel(
@@ -39,16 +49,12 @@ public class NavigationIntentBuilder
             return new NavigationIntentBuilder();
         }
 
-        var bundle = new Bundle();
-
         var binderType = typeof(NavigationDataBinder<>).MakeGenericType(viewModelType);
         var binder = (AndroidOS.Binder)Activator.CreateInstance(binderType, viewModel)!;
 
-        bundle.PutBinder(NavigationStrings.ViewModel, binder);
+        this.Bundle.PutBinder(NavigationStrings.ViewModel, binder);
 
-        var intent = this.Intent.PutExtras(bundle);
-
-        return new NavigationIntentBuilder(intent);
+        return new NavigationIntentBuilder(this.Intent, this.Bundle);
     }
 
     public NavigationIntentBuilder SetModel(
@@ -60,16 +66,13 @@ public class NavigationIntentBuilder
             return new NavigationIntentBuilder();
         }
 
-        var bundle = new Bundle();
-        bundle.PutBinder(NavigationStrings.Model, new NavigationDataBinder(model));
-        bundle.PutBinder(NavigationStrings.ModelType, new NavigationDataBinder(modelType));
+        this.Bundle.PutBinder(NavigationStrings.Model, new NavigationDataBinder(model));
+        this.Bundle.PutBinder(NavigationStrings.ModelType, new NavigationDataBinder(modelType));
 
-        var intent = this.Intent.PutExtras(bundle);
-
-        return new NavigationIntentBuilder(intent);
+        return new NavigationIntentBuilder(this.Intent, this.Bundle);
     }
 
-    public Intent? Build() => this.Intent;
+    public Intent? Build() => this.Intent?.PutExtras(this.Bundle);
 
     private static Type? GetViewForViewModel(
         NavigationService navigationService,

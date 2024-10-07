@@ -129,4 +129,7 @@
   <data name="ViewModel" xml:space="preserve">
     <value>viewModel</value>
   </data>
+  <data name="NavigationType" xml:space="preserve">
+    <value>navigationType</value>
+  </data>
 </root>

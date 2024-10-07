@@ -14,7 +14,7 @@ public static class NavigationHandlers
         Type viewModelType)
     {
         var intent = NavigationIntentBuilder
-            .CreateIntent(activity, navigationService, viewModelType)
+            .CreateIntent(RequestedNavigationTo.NewViewModel, activity, navigationService, viewModelType)
             .Build();
 
         if (intent is null)
@@ -32,7 +32,7 @@ public static class NavigationHandlers
         ViewModelBase viewModel)
     {
         var intent = NavigationIntentBuilder
-            .CreateIntent(activity, navigationService, viewModelType)
+            .CreateIntent(RequestedNavigationTo.ExistingViewModel, activity, navigationService, viewModelType)
             .SetViewModel(viewModelType, viewModel)
             .Build();
 
@@ -52,7 +52,7 @@ public static class NavigationHandlers
         object? model)
     {
         var intent = NavigationIntentBuilder
-            .CreateIntent(activity, navigationService, viewModelType)
+            .CreateIntent(RequestedNavigationTo.NewViewModelWithModel ,activity, navigationService, viewModelType)
             .SetModel(modelType, model)
             .Build();
 
@@ -72,7 +72,7 @@ public static class NavigationHandlers
         object? model)
     {
         var intent = NavigationIntentBuilder
-            .CreateIntent(activity, navigationService, viewModelType)
+            .CreateIntent(RequestedNavigationTo.NewViewModelWithModelForResult, activity, navigationService, viewModelType)
             .SetModel(modelType, model)
             .Build();
 

@@ -79,6 +79,15 @@ namespace DjX.Mvvm.Platforms.Android.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to navigationType.
+        /// </summary>
+        internal static string NavigationType {
+            get {
+                return ResourceManager.GetString("NavigationType", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to resultData.
         /// </summary>
         internal static string ResultData {

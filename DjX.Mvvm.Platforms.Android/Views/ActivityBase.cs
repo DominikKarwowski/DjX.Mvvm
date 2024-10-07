@@ -72,28 +72,29 @@ public abstract class ActivityBase<TViewModel> : AppCompatActivity
             throw new InvalidOperationException($"Application must be of type {nameof(ApplicationBase)}");
         }
 
-        if (this.Intent?.Extras is null)
+        // TODO refactor into separate viewModel resolver method and handle null reference appropriately
+        if (this.Intent?.Extras is not null)
+        {
+            var requestedNavigationType = (RequestedNavigationTo)this.Intent.Extras.GetInt(NavigationStrings.NavigationType);
+
+            this.ViewModel = requestedNavigationType switch
+            {
+                RequestedNavigationTo.NewViewModel =>
+                    app.GetViewModelFactory<TViewModel>().CreateViewModel(),
+                RequestedNavigationTo.ExistingViewModel =>
+                    (this.Intent.Extras.GetBinder(NavigationStrings.ViewModel) as NavigationDataBinder<TViewModel>)?.Data!,
+                RequestedNavigationTo.NewViewModelWithModel or
+                RequestedNavigationTo.NewViewModelWithModelForResult =>
+                    app.GetViewModelFactory<TViewModel>().CreateViewModel(
+                        (this.Intent.Extras.GetBinder(NavigationStrings.Model) as NavigationDataBinder)?.Data,
+                        (this.Intent.Extras.GetBinder(NavigationStrings.ModelType) as NavigationDataBinder)?.Data as Type),
+                _ => throw new Exception("Unsupported navigation type."),
+            };
+        }
+        else
         {
             this.ViewModel = app.GetViewModelFactory<TViewModel>().CreateViewModel();
-            base.OnCreate(savedInstanceState);
-            return;
         }
-
-        var viewModel = (this.Intent.Extras.GetBinder(NavigationStrings.ViewModel) as NavigationDataBinder<TViewModel>)?.Data;
-
-        if (viewModel is not null)
-        {
-            this.ViewModel = viewModel;
-            base.OnCreate(savedInstanceState);
-            return;
-        }
-
-        var model = (this.Intent.Extras.GetBinder(NavigationStrings.Model) as NavigationDataBinder)?.Data;
-        var modelType = (this.Intent.Extras.GetBinder(NavigationStrings.ModelType) as NavigationDataBinder)?.Data as Type;
-
-        this.ViewModel = modelType is not null
-            ? app.GetViewModelFactory<TViewModel>().CreateViewModel(model, modelType)
-            : app.GetViewModelFactory<TViewModel>().CreateViewModel();
 
         base.OnCreate(savedInstanceState);
     }
