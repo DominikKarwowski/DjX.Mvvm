@@ -117,22 +117,19 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="Namespace" xml:space="preserve">
-    <value>http://schemas.android.com/apk/res/android</value>
+  <data name="Model" xml:space="preserve">
+    <value>model</value>
   </data>
-  <data name="AppNamespace" xml:space="preserve">
-    <value>http://schemas.android.com/apk/res-auto</value>
+  <data name="ModelType" xml:space="preserve">
+    <value>modelType</value>
   </data>
-  <data name="IdAttributeName" xml:space="preserve">
-    <value>id</value>
+  <data name="ResultData" xml:space="preserve">
+    <value>resultData</value>
   </data>
-  <data name="BindAttributeName" xml:space="preserve">
-    <value>bind</value>
+  <data name="ViewModel" xml:space="preserve">
+    <value>viewModel</value>
   </data>
-  <data name="ItemSourceAttributeName" xml:space="preserve">
-    <value>item_source</value>
-  </data>
-  <data name="ItemTemplateAttributeName" xml:space="preserve">
-    <value>item_template</value>
+  <data name="NavigationType" xml:space="preserve">
+    <value>navigationType</value>
   </data>
 </root>

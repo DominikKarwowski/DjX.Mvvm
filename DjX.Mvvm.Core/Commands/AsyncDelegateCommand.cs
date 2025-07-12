@@ -2,18 +2,17 @@
 
 namespace DjX.Mvvm.Core.Commands;
 
-
 //https://learn.microsoft.com/en-us/archive/msdn-magazine/2014/april/async-programming-patterns-for-asynchronous-mvvm-applications-commands
 //https://johnthiriet.com/mvvm-going-async-with-async-command/
 
-public class DjXAsyncDelegateCommand<T> : IDjXAsyncCommand<T>, IDisposable
+public class AsyncDelegateCommand<T> : ICommandBase, IDisposable
 {
     private readonly Func<T?, Task> _execute;
     private readonly Func<T?, bool>? _canExecute;
     private readonly SemaphoreSlim _semaphore = new(1, 1);
     private bool disposedValue;
 
-    public DjXAsyncDelegateCommand(Func<T?, Task> execute, Func<T?, bool>? canExecute = null)
+    public AsyncDelegateCommand(Func<T?, Task> execute, Func<T?, bool>? canExecute = null)
     {
         ArgumentNullException.ThrowIfNull(execute);
         this._execute = execute;
@@ -60,14 +59,14 @@ public class DjXAsyncDelegateCommand<T> : IDjXAsyncCommand<T>, IDisposable
     }
 }
 
-public class DjXAsyncDelegateCommand : IDjXAsyncCommand, IDisposable
+public class AsyncDelegateCommand : ICommandBase, IDisposable
 {
     private readonly Func<object?, Task> _execute;
     private readonly Func<object?, bool>? _canExecute;
     private readonly SemaphoreSlim _semaphore = new(1, 1);
     private bool disposedValue;
 
-    public DjXAsyncDelegateCommand(Func<Task> execute, Func<bool>? canExecute = null)
+    public AsyncDelegateCommand(Func<Task> execute, Func<bool>? canExecute = null)
     {
         ArgumentNullException.ThrowIfNull(execute);
         this._execute = new Func<object?, Task>(param => execute());
@@ -76,7 +75,7 @@ public class DjXAsyncDelegateCommand : IDjXAsyncCommand, IDisposable
             : new Func<object?, bool>(param => canExecute());
     }
 
-    public DjXAsyncDelegateCommand(Func<object?, Task> execute, Func<object?, bool>? canExecute = null)
+    public AsyncDelegateCommand(Func<object?, Task> execute, Func<object?, bool>? canExecute = null)
     {
         ArgumentNullException.ThrowIfNull(execute);
         this._execute = execute;

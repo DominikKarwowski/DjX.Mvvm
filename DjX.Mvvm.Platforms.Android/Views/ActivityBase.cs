@@ -37,18 +37,29 @@ public abstract class ActivityBase<TViewModel> : AppCompatActivity
             return view;
         }
 
-        var bindingsToParse = attrs.GetAttributeValue(AndroidStrings.AppNamespace, AndroidStrings.BindAttributeName);
-        var collectionToBind = attrs.GetAttributeValue(AndroidStrings.AppNamespace, AndroidStrings.ItemSourceAttributeName);
-        var templateResourceId = attrs.GetAttributeResourceValue(AndroidStrings.AppNamespace, AndroidStrings.ItemTemplateAttributeName, 0);
+        var bindingDeclaration = attrs.GetAttributeValue(AttributeStrings.AppNamespace, AttributeStrings.BindAttributeName);
 
-        if (bindingsToParse is not null)
+        if (bindingDeclaration is not null)
         {
-            this.bindingObject.RegisterDeclaredBindings(this.ViewModel, view, bindingsToParse);
+            this.bindingObject.RegisterDeclaredBindings(view, this.ViewModel, bindingDeclaration);
         }
 
-        if (view is RecyclerView recyclerView && collectionToBind is not null && templateResourceId is not 0)
+        if (view is RecyclerView recyclerView)
         {
-            this.bindingObject.RegisterCollectionBindingSet(this.ViewModel, collectionToBind, recyclerView, templateResourceId);
+            var collectionToBind = attrs.GetAttributeValue(AttributeStrings.AppNamespace, AttributeStrings.ItemSourceAttributeName);
+            var templateResourceId = attrs.GetAttributeResourceValue(AttributeStrings.AppNamespace, AttributeStrings.ItemTemplateAttributeName, 0);
+
+            if (collectionToBind is not null && templateResourceId is not 0)
+            {
+                var itemBindingDeclaration = attrs.GetAttributeValue(AttributeStrings.AppNamespace, AttributeStrings.ItemBindAttributeName);
+
+                this.bindingObject.RegisterCollectionBindingSet(
+                    recyclerView,
+                    this.ViewModel,
+                    collectionToBind,
+                    templateResourceId,
+                    itemBindingDeclaration);
+            }
         }
 
         return view;
@@ -56,17 +67,34 @@ public abstract class ActivityBase<TViewModel> : AppCompatActivity
 
     protected override void OnCreate(Bundle? savedInstanceState)
     {
-        if (this.Application is not ApplicationBase djXApplication)
+        if (this.Application is not ApplicationBase app)
         {
             throw new InvalidOperationException($"Application must be of type {nameof(ApplicationBase)}");
         }
 
-        var model = (this.Intent?.Extras?.GetBinder("model") as NavigationDataBinder)?.Data;
-        var modelType = (this.Intent?.Extras?.GetBinder("modelType") as NavigationDataBinder)?.Data as Type;
+        // TODO refactor into separate viewModel resolver method and handle null reference appropriately
+        if (this.Intent?.Extras is not null)
+        {
+            var requestedNavigationType = (RequestedNavigationTo)this.Intent.Extras.GetInt(NavigationStrings.NavigationType);
 
-        this.ViewModel = modelType is not null
-            ? djXApplication.GetViewModelFactory<TViewModel>().CreateViewModel(model, modelType)
-            : djXApplication.GetViewModelFactory<TViewModel>().CreateViewModel();
+            this.ViewModel = requestedNavigationType switch
+            {
+                RequestedNavigationTo.NewViewModel =>
+                    app.GetViewModelFactory<TViewModel>().CreateViewModel(),
+                RequestedNavigationTo.ExistingViewModel =>
+                    (this.Intent.Extras.GetBinder(NavigationStrings.ViewModel) as NavigationDataBinder<TViewModel>)?.Data!,
+                RequestedNavigationTo.NewViewModelWithModel or
+                RequestedNavigationTo.NewViewModelWithModelForResult =>
+                    app.GetViewModelFactory<TViewModel>().CreateViewModel(
+                        (this.Intent.Extras.GetBinder(NavigationStrings.Model) as NavigationDataBinder)?.Data,
+                        (this.Intent.Extras.GetBinder(NavigationStrings.ModelType) as NavigationDataBinder)?.Data as Type),
+                _ => throw new Exception("Unsupported navigation type."),
+            };
+        }
+        else
+        {
+            this.ViewModel = app.GetViewModelFactory<TViewModel>().CreateViewModel();
+        }
 
         base.OnCreate(savedInstanceState);
     }
@@ -100,7 +128,7 @@ public abstract class ActivityBase<TViewModel> : AppCompatActivity
 
     protected override void OnActivityResult(int requestCode, [GeneratedEnum] Result resultCode, Intent? data)
     {
-        var resultData = (data?.Extras?.GetBinder(NavigationHandlers.ResultData) as NavigationDataBinder)?.Data;
+        var resultData = (data?.Extras?.GetBinder(NavigationStrings.ResultData) as NavigationDataBinder)?.Data;
 
         if (resultData is null)
         {
@@ -134,6 +162,7 @@ public abstract class ActivityBase<TViewModel> : AppCompatActivity
     private void SubscribeToNavigationEvents()
     {
         this.NavigationService.NavigationToRequested += this.NavigateTo;
+        this.NavigationService.NavigationWithViewModelToRequested += this.NavigateWithViewModelTo;
         this.NavigationService.NavigationWithModelToRequested += this.NavigateWithModelTo;
         this.NavigationService.NavigationWithModelForResultToRequested += this.NavigateWithModelForResultTo;
         this.NavigationService.NavigationCloseRequested += this.NavigateClose;
@@ -143,6 +172,7 @@ public abstract class ActivityBase<TViewModel> : AppCompatActivity
     private void UnsubscribeFromNavigationEvents()
     {
         this.NavigationService.NavigationToRequested -= this.NavigateTo;
+        this.NavigationService.NavigationWithViewModelToRequested -= this.NavigateWithViewModelTo;
         this.NavigationService.NavigationWithModelToRequested -= this.NavigateWithModelTo;
         this.NavigationService.NavigationWithModelForResultToRequested -= this.NavigateWithModelForResultTo;
         this.NavigationService.NavigationCloseRequested -= this.NavigateClose;
@@ -151,6 +181,9 @@ public abstract class ActivityBase<TViewModel> : AppCompatActivity
 
     private void NavigateTo(Type viewModelType)
         => NavigationHandlers.NavigateTo(this, this.NavigationService, viewModelType);
+
+    private void NavigateWithViewModelTo(Type viewModelType, ViewModelBase viewModel)
+        => NavigationHandlers.NavigateWithViewModelTo(this, this.NavigationService, viewModelType, viewModel);
 
     private void NavigateWithModelTo(Type viewModelType, Type modelType, object? model)
         => NavigationHandlers.NavigateWithModelTo(this, this.NavigationService, viewModelType, modelType, model);

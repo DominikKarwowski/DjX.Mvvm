@@ -6,3 +6,8 @@ public class NavigationDataBinder(object? data) : AndroidOS.Binder
 {
     public object? Data { get; } = data;
 }
+
+public class NavigationDataBinder<T>(T? data) : AndroidOS.Binder
+{
+    public T? Data { get; } = data;
+}

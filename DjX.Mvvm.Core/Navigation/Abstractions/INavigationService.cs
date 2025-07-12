@@ -9,6 +9,9 @@ public interface INavigationService
     void NavigateTo<TViewModel>()
         where TViewModel : ViewModelBase;
 
+    void NavigateWithViewModelTo<TViewModel>(TViewModel viewModel)
+        where TViewModel : ViewModelBase;
+
     void NavigateWithModelTo<TViewModel, TModel>(TModel model)
         where TViewModel : ViewModelBase<TModel>;
 

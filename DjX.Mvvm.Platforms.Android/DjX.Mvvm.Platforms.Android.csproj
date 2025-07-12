@@ -22,17 +22,26 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Update="Resources\AndroidStrings.Designer.cs">
-      <DependentUpon>AndroidStrings.resx</DependentUpon>
+    <Compile Update="Resources\AttributeStrings.Designer.cs">
+      <DependentUpon>AttributeStrings.resx</DependentUpon>
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
+    </Compile>
+    <Compile Update="Resources\NavigationStrings.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>NavigationStrings.resx</DependentUpon>
     </Compile>
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Update="Resources\AndroidStrings.resx">
-      <LastGenOutput>AndroidStrings.Designer.cs</LastGenOutput>
+    <EmbeddedResource Update="Resources\AttributeStrings.resx">
+      <LastGenOutput>AttributeStrings.Designer.cs</LastGenOutput>
       <Generator>ResXFileCodeGenerator</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\NavigationStrings.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>NavigationStrings.Designer.cs</LastGenOutput>
     </EmbeddedResource>
   </ItemGroup>
 
