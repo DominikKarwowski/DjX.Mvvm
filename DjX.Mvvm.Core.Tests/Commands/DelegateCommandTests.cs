@@ -8,14 +8,10 @@ public class DelegateCommandTests
     [Test]
     public void DelegateCommand_throws_exception_if_instantiated_with_a_null_execute_action()
     {
-        Action? action = null;
-        Action<object?>? actionWithParam = null;
-
-        Assert.Multiple(() =>
-        {
-            Assert.Throws<ArgumentNullException>(() => new DjXDelegateCommand(action!));
-            Assert.Throws<ArgumentNullException>(() => new DjXDelegateCommand(actionWithParam!));
-        });
+#pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
+        // ReSharper disable once ObjectCreationAsStatement
+        Assert.Throws<ArgumentNullException>(() => new DelegateCommand(null));
+#pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
     }
 
     [Test]
@@ -23,7 +19,7 @@ public class DelegateCommandTests
     {
         var canExecuteChangedRaised = false;
 
-        var sut = new DjXDelegateCommand(() => { });
+        var sut = new DelegateCommand(() => { });
 
         sut.CanExecuteChanged += (s, e) => canExecuteChangedRaised = true;
 
@@ -35,9 +31,9 @@ public class DelegateCommandTests
     [Test]
     public void CanExecute_returns_true_if_canExecute_function_is_not_specified_in_DelegateCommand()
     {
-        var sut = new DjXDelegateCommand(() => { });
+        var sut = new DelegateCommand(() => { });
 
-        var result = sut.CanExecute(null);
+        var result = sut.CanExecute();
 
         Assert.That(result, Is.True);
     }
@@ -47,7 +43,7 @@ public class DelegateCommandTests
     {
         var canExecuteWasInvoked = false;
 
-        var sut = new DjXDelegateCommand(
+        var sut = new DelegateCommand(
             () => { },
             () =>
             {
@@ -55,7 +51,7 @@ public class DelegateCommandTests
                 return true;
             });
 
-        sut.CanExecute(null);
+        sut.CanExecute();
 
         Assert.That(canExecuteWasInvoked, Is.True);
     }
@@ -65,7 +61,7 @@ public class DelegateCommandTests
     {
         var executeWasInvoked = false;
 
-        var sut = new DjXDelegateCommand(() => executeWasInvoked = true);
+        var sut = new DelegateCommand(() => executeWasInvoked = true);
 
         sut.Execute();
 
@@ -79,9 +75,10 @@ public class DelegateCommandOfTTests
     [Test]
     public void DelegateCommand_throws_exception_if_instantiated_with_a_null_execute_action()
     {
-        Action<string?>? actionWithParam = null;
-
-        Assert.Throws<ArgumentNullException>(() => new DjXDelegateCommand<string>(actionWithParam!));
+#pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
+        // ReSharper disable once ObjectCreationAsStatement
+        Assert.Throws<ArgumentNullException>(() => new DelegateCommand<string>(null));
+#pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
     }
 
     [Test]
@@ -89,7 +86,7 @@ public class DelegateCommandOfTTests
     {
         var canExecuteChangedRaised = false;
 
-        var sut = new DjXDelegateCommand<string>(s => { });
+        var sut = new DelegateCommand<string>(s => { });
 
         sut.CanExecuteChanged += (s, e) => canExecuteChangedRaised = true;
 
@@ -101,9 +98,9 @@ public class DelegateCommandOfTTests
     [Test]
     public void CanExecute_returns_true_if_canExecute_function_is_not_specified_in_DelegateCommand()
     {
-        var sut = new DjXDelegateCommand<string>(s => { });
+        var sut = new DelegateCommand<string>(s => { });
 
-        var result = sut.CanExecute("");
+        var result = sut.CanExecute("whatever for the test");
 
         Assert.That(result, Is.True);
     }
@@ -113,7 +110,7 @@ public class DelegateCommandOfTTests
     {
         var canExecuteWasInvoked = false;
 
-        var sut = new DjXDelegateCommand<string>(
+        var sut = new DelegateCommand<string>(
             s => { },
             s =>
             {
@@ -121,7 +118,7 @@ public class DelegateCommandOfTTests
                 return true;
             });
 
-        sut.CanExecute("");
+        sut.CanExecute("whatever for the test");
 
         Assert.That(canExecuteWasInvoked, Is.True);
     }
@@ -131,7 +128,7 @@ public class DelegateCommandOfTTests
     {
         var executeWasInvoked = false;
 
-        var sut = new DjXDelegateCommand<string>(s => executeWasInvoked = true);
+        var sut = new DelegateCommand<string>(s => executeWasInvoked = true);
 
         sut.Execute("");
 

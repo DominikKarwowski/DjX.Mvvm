@@ -6,7 +6,7 @@ public static class ArgumentValidator
     {
         if (parameter?.GetType() != typeof(T))
         {
-            throw new ArgumentException("The parameter must be of type " + typeof(T).FullName);
+            throw new ArgumentException("The parameter cannot be null and must be of type " + typeof(T).FullName);
         }
     }
 }

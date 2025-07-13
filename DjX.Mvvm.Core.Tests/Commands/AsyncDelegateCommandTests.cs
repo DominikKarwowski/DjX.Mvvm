@@ -9,14 +9,10 @@ public class AsyncDelegateCommandTests
     [Test]
     public void DelegateCommand_throws_exception_if_instantiated_with_a_null_execute_action()
     {
-        Func<Task>? asyncAction = null;
-        Func<object?, Task>? asyncActionWithParam = null;
-
-        Assert.Multiple(() =>
-        {
-            Assert.Throws<ArgumentNullException>(() => new DjXAsyncDelegateCommand(asyncAction!));
-            Assert.Throws<ArgumentNullException>(() => new DjXAsyncDelegateCommand(asyncActionWithParam!));
-        });
+#pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
+        // ReSharper disable once ObjectCreationAsStatement
+        Assert.Throws<ArgumentNullException>(() => new AsyncDelegateCommand(null));
+#pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
     }
 
     [Test]
@@ -24,7 +20,7 @@ public class AsyncDelegateCommandTests
     {
         var canExecuteChangedRaised = false;
 
-        var sut = new DjXAsyncDelegateCommand(() => Task.CompletedTask);
+        var sut = new AsyncDelegateCommand(() => Task.CompletedTask);
 
         sut.CanExecuteChanged += (s, e) => canExecuteChangedRaised = true;
 
@@ -36,9 +32,9 @@ public class AsyncDelegateCommandTests
     [Test]
     public void CanExecute_returns_true_if_canExecute_function_is_not_specified_in_DelegateCommand()
     {
-        var sut = new DjXAsyncDelegateCommand(() => Task.CompletedTask);
+        var sut = new AsyncDelegateCommand(() => Task.CompletedTask);
 
-        var result = sut.CanExecute(null);
+        var result = sut.CanExecute();
 
         Assert.That(result, Is.True);
     }
@@ -48,7 +44,7 @@ public class AsyncDelegateCommandTests
     {
         var canExecuteWasInvoked = false;
 
-        var sut = new DjXAsyncDelegateCommand(
+        var sut = new AsyncDelegateCommand(
             () => Task.CompletedTask,
             () =>
             {
@@ -56,7 +52,7 @@ public class AsyncDelegateCommandTests
                 return true;
             });
 
-        sut.CanExecute(null);
+        sut.CanExecute();
 
         Assert.That(canExecuteWasInvoked, Is.True);
     }
@@ -66,7 +62,7 @@ public class AsyncDelegateCommandTests
     {
         var executeWasInvoked = false;
 
-        var sut = new DjXAsyncDelegateCommand(() =>
+        var sut = new AsyncDelegateCommand(() =>
         {
             executeWasInvoked = true;
             return Task.CompletedTask;
@@ -80,7 +76,7 @@ public class AsyncDelegateCommandTests
     [Test]
     public async Task ExecuteAsync_executes_only_one_action_delegate_at_a_time()
     {
-        var sut = new DjXAsyncDelegateCommand(() => Task.Delay(25));
+        var sut = new AsyncDelegateCommand(() => Task.Delay(25));
 
         var sw = new Stopwatch();
 
@@ -104,14 +100,10 @@ public class AsyncDelegateCommandOfTTests
     [Test]
     public void DelegateCommand_throws_exception_if_instantiated_with_a_null_execute_action()
     {
-        Func<string, Task>? asyncAction = null;
-        Func<object?, Task>? asyncActionWithParam = null;
-
-        Assert.Multiple(() =>
-        {
-            Assert.Throws<ArgumentNullException>(() => new DjXAsyncDelegateCommand<string>(asyncAction!));
-            Assert.Throws<ArgumentNullException>(() => new DjXAsyncDelegateCommand<string>(asyncActionWithParam!));
-        });
+#pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
+        // ReSharper disable once ObjectCreationAsStatement
+        Assert.Throws<ArgumentNullException>(() => new AsyncDelegateCommand<string>(null));
+#pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
     }
 
     [Test]
@@ -119,7 +111,7 @@ public class AsyncDelegateCommandOfTTests
     {
         var canExecuteChangedRaised = false;
 
-        var sut = new DjXAsyncDelegateCommand<string>(s => Task.CompletedTask);
+        var sut = new AsyncDelegateCommand<string>(s => Task.CompletedTask);
 
         sut.CanExecuteChanged += (s, e) => canExecuteChangedRaised = true;
 
@@ -131,9 +123,9 @@ public class AsyncDelegateCommandOfTTests
     [Test]
     public void CanExecute_returns_true_if_canExecute_function_is_not_specified_in_DelegateCommand()
     {
-        var sut = new DjXAsyncDelegateCommand<string>(s => Task.CompletedTask);
+        var sut = new AsyncDelegateCommand<string>(s => Task.CompletedTask);
 
-        var result = sut.CanExecute(null);
+        var result = sut.CanExecute("whatever for the test");
 
         Assert.That(result, Is.True);
     }
@@ -143,7 +135,7 @@ public class AsyncDelegateCommandOfTTests
     {
         var canExecuteWasInvoked = false;
 
-        var sut = new DjXAsyncDelegateCommand<string>(
+        var sut = new AsyncDelegateCommand<string>(
             s => Task.CompletedTask,
             s =>
             {
@@ -151,7 +143,7 @@ public class AsyncDelegateCommandOfTTests
                 return true;
             });
 
-        sut.CanExecute(null);
+        sut.CanExecute("whatever for the test");
 
         Assert.That(canExecuteWasInvoked, Is.True);
     }
@@ -161,13 +153,13 @@ public class AsyncDelegateCommandOfTTests
     {
         var executeWasInvoked = false;
 
-        var sut = new DjXAsyncDelegateCommand<string>(s =>
+        var sut = new AsyncDelegateCommand<string>(s =>
         {
             executeWasInvoked = true;
             return Task.CompletedTask;
         });
 
-        await sut.ExecuteAsync("");
+        await sut.ExecuteAsync("whatever for the test");
 
         Assert.That(executeWasInvoked, Is.True);
     }
@@ -175,16 +167,16 @@ public class AsyncDelegateCommandOfTTests
     [Test]
     public async Task ExecuteAsync_executes_only_one_action_delegate_at_a_time()
     {
-        var sut = new DjXAsyncDelegateCommand<string>(s => Task.Delay(25));
+        var sut = new AsyncDelegateCommand<string>(s => Task.Delay(25));
 
         var sw = new Stopwatch();
 
         sw.Start();
 
-        var execution1 = sut.ExecuteAsync("");
-        var execution2 = sut.ExecuteAsync("");
-        var execution3 = sut.ExecuteAsync("");
-        var execution4 = sut.ExecuteAsync("");
+        var execution1 = sut.ExecuteAsync("whatever for the test");
+        var execution2 = sut.ExecuteAsync("whatever for the test");
+        var execution3 = sut.ExecuteAsync("whatever for the test");
+        var execution4 = sut.ExecuteAsync("whatever for the test");
         await Task.WhenAll(execution1, execution2, execution3, execution4);
 
         sw.Stop();

@@ -85,6 +85,7 @@ public sealed class AsyncDelegateCommand : ICommandBase, IDisposable
     
     public event EventHandler? CanExecuteChanged;
     public void RaiseCanExecuteChanged() => CanExecuteChanged?.Invoke(this, EventArgs.Empty);
+    public bool CanExecute() => this._canExecute is null || this._canExecute();
     
     public async Task ExecuteAsync()
     {
@@ -115,6 +116,6 @@ public sealed class AsyncDelegateCommand : ICommandBase, IDisposable
     
     public void Dispose() => this.Dispose(disposing: true);
     
-    bool ICommand.CanExecute(object? parameter) => this._canExecute is null || this._canExecute();
+    bool ICommand.CanExecute(object? parameter) => this.CanExecute();
     void ICommand.Execute(object? parameter) => this.ExecuteAsync().Wait();
 }

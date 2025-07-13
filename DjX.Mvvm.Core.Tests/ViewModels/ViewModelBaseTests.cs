@@ -24,18 +24,9 @@ public class ViewModelBaseTests
 
     internal class TestViewModel : ViewModelBase
     {
-        public IDjXCommand NonAsyncCommand { get; set; }
-        public IDjXAsyncCommand NonGenericAsyncCommand { get; set; }
-        public IDjXAsyncCommand<string> GenericAsyncCommand { get; set; }
-        public IDjXAsyncCommand<int> AnotherGenericAsyncCommand { get; set; }
-
-        public TestViewModel()
-        {
-            this.NonAsyncCommand = new DjXDelegateCommand(() => { /* do nothing */ });
-            this.NonGenericAsyncCommand = new DjXAsyncDelegateCommand(async () => await Task.Run(() => { /* do nothing */ }));
-            this.GenericAsyncCommand = new DjXAsyncDelegateCommand<string>(async _ => await Task.Run(() => { /* do nothing */ }));
-            this.AnotherGenericAsyncCommand = new DjXAsyncDelegateCommand<int>(async _ => await Task.Run(() => { /* do nothing */ }));
-        }
-
+        public DelegateCommand NonAsyncCommand { get; } = new(() => { });
+        public AsyncDelegateCommand NonGenericAsyncCommand { get; } = new(async () => await Task.Run(() => { }));
+        public AsyncDelegateCommand<string> GenericAsyncCommand { get; } = new(async _ => await Task.Run(() => { }));
+        public AsyncDelegateCommand<int> AnotherGenericAsyncCommand { get; } = new(async _ => await Task.Run(() => { }));
     }
 }
