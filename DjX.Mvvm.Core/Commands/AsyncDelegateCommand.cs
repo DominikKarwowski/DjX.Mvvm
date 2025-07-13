@@ -9,12 +9,12 @@ namespace DjX.Mvvm.Core.Commands;
 
 public sealed class AsyncDelegateCommand<T> : ICommandBase, IDisposable
 {
-    private readonly Func<T, Task> _execute;
-    private readonly Func<T, bool>? _canExecute;
+    private readonly Func<T?, Task> _execute;
+    private readonly Func<T?, bool>? _canExecute;
     private readonly SemaphoreSlim _semaphore = new(1, 1);
     private bool _disposedValue;
 
-    public AsyncDelegateCommand(Func<T, Task> execute, Func<T, bool>? canExecute = null)
+    public AsyncDelegateCommand(Func<T?, Task> execute, Func<T?, bool>? canExecute = null)
     {
         ArgumentNullException.ThrowIfNull(execute);
         this._execute = execute;
@@ -23,9 +23,9 @@ public sealed class AsyncDelegateCommand<T> : ICommandBase, IDisposable
 
     public event EventHandler? CanExecuteChanged;
     public void RaiseCanExecuteChanged() => this.CanExecuteChanged?.Invoke(this, EventArgs.Empty);
-    public bool CanExecute(T parameter) => this._canExecute is null || this._canExecute(parameter);
+    public bool CanExecute(T? parameter) => this._canExecute is null || this._canExecute(parameter);
     
-    public async Task ExecuteAsync(T parameter)
+    public async Task ExecuteAsync(T? parameter)
     {
         await this._semaphore.WaitAsync();
         
@@ -56,16 +56,16 @@ public sealed class AsyncDelegateCommand<T> : ICommandBase, IDisposable
 
     bool ICommand.CanExecute(object? parameter)
     {
-        ArgumentValidator.ThrowIfNullOrNotOfType<T>(parameter);
+        ArgumentValidator.ThrowIfNotOfType<T?>(parameter);
         
-        return this.CanExecute((T)parameter!);
+        return this.CanExecute((T?)parameter);
     }
 
     void ICommand.Execute(object? parameter)
     {
-        ArgumentValidator.ThrowIfNullOrNotOfType<T>(parameter);
+        ArgumentValidator.ThrowIfNotOfType<T?>(parameter);
         
-        this.ExecuteAsync((T)parameter!).Wait();
+        this.ExecuteAsync((T?)parameter).Wait();
     }
 }
 
@@ -84,7 +84,7 @@ public sealed class AsyncDelegateCommand : ICommandBase, IDisposable
     }
     
     public event EventHandler? CanExecuteChanged;
-    public void RaiseCanExecuteChanged() => CanExecuteChanged?.Invoke(this, EventArgs.Empty);
+    public void RaiseCanExecuteChanged() => this.CanExecuteChanged?.Invoke(this, EventArgs.Empty);
     public bool CanExecute() => this._canExecute is null || this._canExecute();
     
     public async Task ExecuteAsync()

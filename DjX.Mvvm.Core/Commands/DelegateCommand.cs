@@ -7,10 +7,10 @@ using DjX.Mvvm.Core.Commands.Abstractions;
 
 public class DelegateCommand<T> : ICommandBase
 {
-    private readonly Action<T> _execute;
-    private readonly Func<T, bool>? _canExecute;
+    private readonly Action<T?> _execute;
+    private readonly Func<T?, bool>? _canExecute;
 
-    public DelegateCommand(Action<T> execute, Func<T, bool>? canExecute = null)
+    public DelegateCommand(Action<T?> execute, Func<T?, bool>? canExecute = null)
     {
         ArgumentNullException.ThrowIfNull(execute, nameof(execute));
         this._execute = execute;
@@ -19,21 +19,21 @@ public class DelegateCommand<T> : ICommandBase
 
     public event EventHandler? CanExecuteChanged;
     public void RaiseCanExecuteChanged() => this.CanExecuteChanged?.Invoke(this, EventArgs.Empty);
-    public bool CanExecute(T parameter) => this._canExecute is null || this._canExecute(parameter);
-    public void Execute(T parameter) => this._execute(parameter);
+    public bool CanExecute(T? parameter) => this._canExecute is null || this._canExecute(parameter);
+    public void Execute(T? parameter) => this._execute(parameter);
     
     bool ICommand.CanExecute(object? parameter)
     {
-        ArgumentValidator.ThrowIfNullOrNotOfType<T>(parameter);
+        ArgumentValidator.ThrowIfNotOfType<T?>(parameter);
         
-        return this.CanExecute((T)parameter!);
+        return this.CanExecute((T?)parameter);
     }
     
     void ICommand.Execute(object? parameter)
     {
-        ArgumentValidator.ThrowIfNullOrNotOfType<T>(parameter);
+        ArgumentValidator.ThrowIfNotOfType<T?>(parameter);
         
-        this.Execute((T)parameter!);
+        this.Execute((T?)parameter);
     }
 }
 
