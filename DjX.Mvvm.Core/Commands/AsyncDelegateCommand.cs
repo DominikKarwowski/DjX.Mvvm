@@ -1,34 +1,34 @@
-﻿using DjX.Mvvm.Core.Commands.Abstractions;
+﻿using System.Windows.Input;
+using DjX.Mvvm.Core.Commands.Abstractions;
+using DjX.Mvvm.Core.Commands.Helpers;
 
 namespace DjX.Mvvm.Core.Commands;
 
 //https://learn.microsoft.com/en-us/archive/msdn-magazine/2014/april/async-programming-patterns-for-asynchronous-mvvm-applications-commands
 //https://johnthiriet.com/mvvm-going-async-with-async-command/
 
-public class AsyncDelegateCommand<T> : ICommandBase, IDisposable
+public sealed class AsyncDelegateCommand<T> : ICommandBase, IDisposable
 {
-    private readonly Func<T?, Task> _execute;
-    private readonly Func<T?, bool>? _canExecute;
+    private readonly Func<T, Task> _execute;
+    private readonly Func<T, bool>? _canExecute;
     private readonly SemaphoreSlim _semaphore = new(1, 1);
-    private bool disposedValue;
+    private bool _disposedValue;
 
-    public AsyncDelegateCommand(Func<T?, Task> execute, Func<T?, bool>? canExecute = null)
+    public AsyncDelegateCommand(Func<T, Task> execute, Func<T, bool>? canExecute = null)
     {
         ArgumentNullException.ThrowIfNull(execute);
         this._execute = execute;
         this._canExecute = canExecute;
     }
 
-    public void RaiseCanExecuteChanged() => CanExecuteChanged?.Invoke(this, EventArgs.Empty);
-
     public event EventHandler? CanExecuteChanged;
-
-    public bool CanExecute(object? parameter) => this._canExecute is null || this._canExecute((T?)parameter);
-    public async void Execute(object? parameter) => await this.ExecuteAsync((T?)parameter);
-
-    public async Task ExecuteAsync(T? parameter)
+    public void RaiseCanExecuteChanged() => this.CanExecuteChanged?.Invoke(this, EventArgs.Empty);
+    public bool CanExecute(T parameter) => this._canExecute is null || this._canExecute(parameter);
+    
+    public async Task ExecuteAsync(T parameter)
     {
         await this._semaphore.WaitAsync();
+        
         try
         {
             await this._execute(parameter);
@@ -39,62 +39,60 @@ public class AsyncDelegateCommand<T> : ICommandBase, IDisposable
         }
     }
 
-    protected virtual void Dispose(bool disposing)
+    private void Dispose(bool disposing)
     {
-        if (!this.disposedValue)
+        if (!this._disposedValue)
         {
             if (disposing)
             {
                 this._semaphore.Dispose();
             }
 
-            this.disposedValue = true;
+            this._disposedValue = true;
         }
     }
 
-    public void Dispose()
+    public void Dispose() => this.Dispose(disposing: true);
+
+    bool ICommand.CanExecute(object? parameter)
     {
-        this.Dispose(disposing: true);
-        GC.SuppressFinalize(this);
+        ArgumentValidator.ThrowIfNullOrNotOfType<T>(parameter);
+        
+        return this.CanExecute((T)parameter!);
+    }
+
+    void ICommand.Execute(object? parameter)
+    {
+        ArgumentValidator.ThrowIfNullOrNotOfType<T>(parameter);
+        
+        this.ExecuteAsync((T)parameter!).Wait();
     }
 }
 
-public class AsyncDelegateCommand : ICommandBase, IDisposable
+public sealed class AsyncDelegateCommand : ICommandBase, IDisposable
 {
-    private readonly Func<object?, Task> _execute;
-    private readonly Func<object?, bool>? _canExecute;
+    private readonly Func<Task> _execute;
+    private readonly Func<bool>? _canExecute;
     private readonly SemaphoreSlim _semaphore = new(1, 1);
-    private bool disposedValue;
+    private bool _disposedValue;
 
     public AsyncDelegateCommand(Func<Task> execute, Func<bool>? canExecute = null)
     {
-        ArgumentNullException.ThrowIfNull(execute);
-        this._execute = new Func<object?, Task>(param => execute());
-        this._canExecute = canExecute is null
-            ? null
-            : new Func<object?, bool>(param => canExecute());
-    }
-
-    public AsyncDelegateCommand(Func<object?, Task> execute, Func<object?, bool>? canExecute = null)
-    {
-        ArgumentNullException.ThrowIfNull(execute);
+        ArgumentNullException.ThrowIfNull(execute, nameof(execute));
         this._execute = execute;
         this._canExecute = canExecute;
     }
-
-    public void RaiseCanExecuteChanged() => CanExecuteChanged?.Invoke(this, EventArgs.Empty);
-
+    
     public event EventHandler? CanExecuteChanged;
-
-    public bool CanExecute(object? parameter) => this._canExecute is null || this._canExecute(parameter);
-    public async void Execute(object? parameter) => await this.ExecuteAsync();
-
+    public void RaiseCanExecuteChanged() => CanExecuteChanged?.Invoke(this, EventArgs.Empty);
+    
     public async Task ExecuteAsync()
     {
         await this._semaphore.WaitAsync();
+        
         try
         {
-            await this._execute(null);
+            await this._execute();
         }
         finally
         {
@@ -102,22 +100,21 @@ public class AsyncDelegateCommand : ICommandBase, IDisposable
         }
     }
 
-    protected virtual void Dispose(bool disposing)
+    private void Dispose(bool disposing)
     {
-        if (!this.disposedValue)
+        if (!this._disposedValue)
         {
             if (disposing)
             {
                 this._semaphore.Dispose();
             }
 
-            this.disposedValue = true;
+            this._disposedValue = true;
         }
     }
-
-    public void Dispose()
-    {
-        this.Dispose(disposing: true);
-        GC.SuppressFinalize(this);
-    }
+    
+    public void Dispose() => this.Dispose(disposing: true);
+    
+    bool ICommand.CanExecute(object? parameter) => this._canExecute is null || this._canExecute();
+    void ICommand.Execute(object? parameter) => this.ExecuteAsync().Wait();
 }

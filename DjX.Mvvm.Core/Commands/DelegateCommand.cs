@@ -1,56 +1,59 @@
-﻿using DjX.Mvvm.Core.Commands.Abstractions;
+﻿using DjX.Mvvm.Core.Commands.Helpers;
 
 namespace DjX.Mvvm.Core.Commands;
 
+using System.Windows.Input;
+using DjX.Mvvm.Core.Commands.Abstractions;
+
 public class DelegateCommand<T> : ICommandBase
 {
-    private readonly Action<T?> _execute;
-    private readonly Func<T?, bool>? _canExecute;
+    private readonly Action<T> _execute;
+    private readonly Func<T, bool>? _canExecute;
 
-    public DelegateCommand(Action<T?> execute, Func<T?, bool>? canExecute = null)
+    public DelegateCommand(Action<T> execute, Func<T, bool>? canExecute = null)
     {
-        ArgumentNullException.ThrowIfNull(execute);
+        ArgumentNullException.ThrowIfNull(execute, nameof(execute));
         this._execute = execute;
         this._canExecute = canExecute;
     }
 
-    public void RaiseCanExecuteChanged() => CanExecuteChanged?.Invoke(this, EventArgs.Empty);
-
     public event EventHandler? CanExecuteChanged;
-
-    public bool CanExecute(object? parameter) => this._canExecute is null || this._canExecute((T?)parameter);
-    public void Execute(object? parameter) => this._execute((T?)parameter);
+    public void RaiseCanExecuteChanged() => this.CanExecuteChanged?.Invoke(this, EventArgs.Empty);
+    public bool CanExecute(T parameter) => this._canExecute is null || this._canExecute(parameter);
     public void Execute(T parameter) => this._execute(parameter);
+    
+    bool ICommand.CanExecute(object? parameter)
+    {
+        ArgumentValidator.ThrowIfNullOrNotOfType<T>(parameter);
+        
+        return this.CanExecute((T)parameter!);
+    }
+    
+    void ICommand.Execute(object? parameter)
+    {
+        ArgumentValidator.ThrowIfNullOrNotOfType<T>(parameter);
+        
+        this.Execute((T)parameter!);
+    }
 }
 
 
 public class DelegateCommand : ICommandBase
 {
-    private readonly Action<object?> _execute;
-    private readonly Func<object?, bool>? _canExecute;
+    private readonly Action _execute;
+    private readonly Func<bool>? _canExecute;
 
     public DelegateCommand(Action execute, Func<bool>? canExecute = null)
     {
-        ArgumentNullException.ThrowIfNull(execute);
-        this._execute = new Action<object?>(param => execute());
-        this._canExecute = canExecute is null
-            ? null
-            : new Func<object?, bool>(param => canExecute());
-    }
-
-    public DelegateCommand(Action<object?> execute, Func<object?, bool>? canExecute = null)
-    {
-        ArgumentNullException.ThrowIfNull(execute);
+        ArgumentNullException.ThrowIfNull(execute, nameof(execute));
         this._execute = execute;
         this._canExecute = canExecute;
     }
-
-    public void RaiseCanExecuteChanged() => CanExecuteChanged?.Invoke(this, EventArgs.Empty);
-
+    
     public event EventHandler? CanExecuteChanged;
-
-    public bool CanExecute(object? parameter) => this._canExecute is null || this._canExecute(parameter);
-    public void Execute(object? parameter) => this._execute(parameter);
-    public void Execute() => this.Execute(null);
-
+    public void RaiseCanExecuteChanged() => this.CanExecuteChanged?.Invoke(this, EventArgs.Empty);
+    public bool CanExecute() => this._canExecute is null || this._canExecute();
+    public void Execute() => this._execute();
+    bool ICommand.CanExecute(object? parameter) => this.CanExecute();
+    void ICommand.Execute(object? parameter) => this.Execute();
 }
